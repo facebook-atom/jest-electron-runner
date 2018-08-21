@@ -1,0 +1,23 @@
+{
+  "name": "jest-electron-runner",
+  "private": true,
+  "version": "0.0.0",
+  "description": "",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/facebook-atom/jest-electron-runner.git"
+  },
+  "author": "",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/facebook-atom/jest-electron-runner/issues"
+  },
+  "homepage": "https://github.com/facebook-atom/jest-electron-runner#readme",
+  "devDependencies": {
+    "flow-bin": "^0.79.1",
+    "jest-circus": "^23.5.0"
+  }
+}
