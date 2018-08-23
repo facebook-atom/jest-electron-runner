@@ -1,6 +1,6 @@
 {
     "name": "@jest-runner/atom",
-    "version": "0.0.0-dev",
+    "version": "0.0.1-alpha.0",
     "description": "Jest runner that spawns atom/electron workers instead of node",
     "author": "Aaron Abramov",
     "license": "MIT",
