@@ -1,0 +1,48 @@
+Arguments: 
+  /Users/dabramov/.nvm/versions/node/v10.1.0/bin/node /opt/facebook/fb-kpm/bin/yarn.js add jest-runtime jest-haste-map
+
+PATH: 
+  /Users/dabramov/.cargo/bin:/Users/dabramov/bin:/Users/dabramov/.nvm/versions/node/v10.1.0/bin:/Users/dabramov/.cargo/bin:/opt/facebook/bin:/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin:/opt/homebrew/bin:/opt/facebook/ops/scripts/chef:/opt/facebook/nuclide/latest/nuclide/pkg/fb-on-demand-cli/bin:/opt/facebook/nuclide/latest/nuclide/pkg/fb-biggrep-cli/bin:/usr/local/munki:/opt/facebook/hg/bin
+
+Yarn version: 
+  1.5.1
+
+Node version: 
+  10.1.0
+
+Platform: 
+  darwin x64
+
+npm manifest: 
+  {
+      "name": "@jest-runner/electron",
+      "version": "0.0.0-dev",
+      "description": "Jest runner that spawns atom/electron workers instead of node",
+      "author": "Aaron Abramov",
+      "license": "MIT",
+      "homepage": "https://github.com/facebook-atom/jest-electron-runner",
+      "repository": "https://github.com/facebook-atom/jest-electron-runner",
+      "dependencies": {
+        "@jest-runner/core": "*"
+      },
+      "devDependencies": {}
+  }
+
+yarn manifest: 
+  No manifest
+
+Lockfile: 
+  No lockfile
+
+Trace: 
+  Error: https://registry.yarnpkg.com/@jest-runner%2fcore: Not found
+      at Request.params.callback [as _callback] (/opt/facebook/fb-kpm/lib/cli.js:65019:18)
+      at Request.self.callback (/opt/facebook/fb-kpm/lib/cli.js:132430:22)
+      at Request.emit (events.js:182:13)
+      at Request.<anonymous> (/opt/facebook/fb-kpm/lib/cli.js:133413:10)
+      at Request.emit (events.js:182:13)
+      at IncomingMessage.<anonymous> (/opt/facebook/fb-kpm/lib/cli.js:133333:12)
+      at Object.onceWrapper (events.js:273:13)
+      at IncomingMessage.emit (events.js:187:15)
+      at endReadableNT (_stream_readable.js:1086:12)
+      at process._tickCallback (internal/process/next_tick.js:63:19)

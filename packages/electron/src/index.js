@@ -8,12 +8,12 @@
  * @format
  */
 
-import type {IPCServer} from '../ipc-server';
-import type {GlobalConfig, Test, TestResult, Watcher} from '../types';
-import type {ServerID} from '../utils';
+import type {IPCServer} from '../../core/src/ipc-server';
+import type {GlobalConfig, Test, TestResult, Watcher} from '../../../types';
+import type {ServerID} from '../../core/src/utils';
 
-import {startServer} from '../ipc-server';
-import {makeUniqServerId, invariant} from '../utils';
+import {startServer} from '@jest-runner/core/ipc-server';
+import {makeUniqServerId, invariant} from '@jest-runner/core/utils';
 import ElectronProcess from './ElectronProcess';
 import throat from 'throat';
 

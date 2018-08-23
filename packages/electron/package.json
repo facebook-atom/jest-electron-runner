@@ -6,5 +6,10 @@
     "license": "MIT",
     "homepage": "https://github.com/facebook-atom/jest-electron-runner",
     "repository": "https://github.com/facebook-atom/jest-electron-runner",
+    "dependencies": {
+        "jest-haste-map": "^23.5.0",
+        "jest-runner": "^23.5.0",
+        "jest-runtime": "^23.5.0"
+    },
     "devDependencies": {}
 }

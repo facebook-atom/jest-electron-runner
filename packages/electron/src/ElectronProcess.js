@@ -8,10 +8,9 @@
  * @format
  */
 
-import type {Test, GlobalConfig, TestResult} from '../types';
-import type {ServerID, WorkerID} from '../utils';
-import type {IPCServer, Socket} from '../ipc-server';
-import type {MessageType} from '../utils';
+import type {Test, GlobalConfig, TestResult} from '../../../types';
+import type {IPCServer, Socket} from '../../core/src/ipc-server';
+import type {MessageType, ServerID, WorkerID} from '../../core/src/utils';
 
 import {
   makeMessage,
@@ -19,7 +18,7 @@ import {
   MESSAGE_TYPES,
   parseJSON,
   parseMessage,
-} from '../utils';
+} from '@jest-runner/core/utils';
 import {spawn, execSync} from 'child_process';
 
 type TestRunResolver = {resolve: TestResult => void, reject: Error => void};

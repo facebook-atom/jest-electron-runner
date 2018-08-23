@@ -8,7 +8,7 @@
  * @format
  */
 
-import type {TestResult, ProjectConfig, GlobalConfig} from './types';
+import type {TestResult, ProjectConfig, GlobalConfig} from '../../../types';
 export opaque type IPCID = string; // server id and worker id merged into one string
 export opaque type WorkerID = string;
 export opaque type ServerID = string;
@@ -124,15 +124,4 @@ export const buildFailureTestResult = (
     testFilePath: testPath,
     testResults: [],
   };
-};
-
-export default {
-  rand,
-  makeUniqServerId,
-  makeUniqWorkerId,
-  parseMessage,
-  makeMessage,
-  MESSAGE_TYPES,
-  parseJSON,
-  buildFailureTestResult,
 };
