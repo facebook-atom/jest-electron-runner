@@ -21,13 +21,7 @@ import mkdirp from 'mkdirp';
 import path from 'path';
 import fs from 'fs';
 import os from 'os';
-import {
-  makeUniqWorkerId,
-  parseMessage,
-  makeMessage,
-  MESSAGE_TYPES,
-  parseJSON,
-} from './utils';
+import {makeUniqWorkerId, parseMessage, makeMessage, MESSAGE_TYPES, parseJSON} from './utils';
 
 type OnMessageCallback = (MessageType, data?: string) => void;
 type TestRunResolver = {resolve: TestResult => void, reject: Error => void};
@@ -136,9 +130,7 @@ export default class TestWorker {
 
   runTest(test: Test): Promise<TestResult> {
     if (this._runningTests.has(test.path)) {
-      throw new Error(
-        "Can't run the same test in the same worker at the same time",
-      );
+      throw new Error("Can't run the same test in the same worker at the same time");
     }
     return new Promise((resolve, reject) => {
       // Ideally we don't want to pass all thing info with every test

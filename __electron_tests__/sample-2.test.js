@@ -7,6 +7,9 @@
  * @flow
  */
 
+import jestCircus from 'jest-circus';
+
 test('test', () => {
   expect(1).toBe(1);
+  expect(jestCircus).toBeDefined();
 });
