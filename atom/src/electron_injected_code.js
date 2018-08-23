@@ -8,11 +8,6 @@
  * @format
  */
 
-/*
- * This file will be injected into an Atom process. It will start an IPC
- * client, find the parant Jest IPC server that spawned this process and say
- * "hey! i'm up and ready to run tests, send them over!"
- */
 import type {IPCWorker} from './ipc-client';
 
 import os from 'os';
@@ -22,13 +17,6 @@ import HasteMap from 'jest-haste-map';
 // $FlowFixMe
 import {Console} from 'console';
 
-/**
- * This should only be used in Atom test contexts!
- * Atom tests normally only display console output in the renderer devtools,
- * which makes debugging difficult in headless mode.
- * This overwrites global.console with a patched console that writes to both
- * the devtools and regular stdio.
- */
 const patchAtomConsole = () => {
   const mainConsole = new Console(process.stdout, process.stderr);
   const rendererConsole = global.console;
@@ -44,6 +32,7 @@ const patchAtomConsole = () => {
             }
           : (...args) => rendererConsole[prop](...args);
     });
+  delete global.console;
   global.console = mergedConsole;
 };
 
@@ -70,29 +59,14 @@ export type AtomParams = {
   buildDefaultApplicationDelegate: any,
 };
 
-module.exports = async function(params: AtomParams) {
+const run = async () => {
   patchAtomConsole();
-  const firstTestPath = params.testPaths[0];
 
   const {serverID, workerID} = getIPCIDs();
   const connection: IPCWorker = await connectToIPCServer({
     serverID,
     workerID,
   });
-
-  global.__buildAtomGlobal = () =>
-    params.buildAtomEnvironment({
-      applicationDelegate: params.buildDefaultApplicationDelegate(),
-      window,
-      document: window.document,
-      configDirPath: os.tmpdir(),
-      enablePersistence: true,
-    });
-
-  // We need to delete whatever is in `prepareStackTrace` to make source map work.
-  // Right now Atom is overwriting it without an ability to reassign, so the only
-  // option is to delete the whole thing. (https://fburl.com/cqp7mj01)
-  delete Error.prepareStackTrace;
 
   return new Promise((resolve, reject) => {
     connection.onMessage(message => {
@@ -128,6 +102,8 @@ module.exports = async function(params: AtomParams) {
           }
           case MESSAGE_TYPES.SHUT_DOWN: {
             resolve();
+            connection.disconnect();
+            process.exit(0);
             break;
           }
         }
@@ -190,3 +166,11 @@ const getResolver = (config, rawModuleMap) => {
     return resolvers[name];
   }
 };
+
+run()
+  .then(() => {
+    console.error('done');
+  })
+  .catch(e => {
+    console.error('Error', e);
+  });

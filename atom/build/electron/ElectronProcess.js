@@ -1,0 +1,180 @@
+'use strict';Object.defineProperty(exports, "__esModule", { value: true });var _extends = Object.assign || function (target) {for (var i = 1; i < arguments.length; i++) {var source = arguments[i];for (var key in source) {if (Object.prototype.hasOwnProperty.call(source, key)) {target[key] = source[key];}}}return target;}; /**
+                                                                                                                                                                                                                                                                                                                                    * Copyright (c) 2014-present, Facebook, Inc. All rights reserved.
+                                                                                                                                                                                                                                                                                                                                    *
+                                                                                                                                                                                                                                                                                                                                    * This source code is licensed under the MIT license found in the
+                                                                                                                                                                                                                                                                                                                                    * LICENSE file in the root directory of this source tree.
+                                                                                                                                                                                                                                                                                                                                    *
+                                                                                                                                                                                                                                                                                                                                    *  strict-local
+                                                                                                                                                                                                                                                                                                                                    * @format
+                                                                                                                                                                                                                                                                                                                                    */
+
+
+
+
+
+
+var _utils = require('../utils');
+
+
+
+
+
+
+var _child_process = require('child_process');
+
+
+
+class ElectronProcess {
+
+
+
+
+
+
+
+
+
+
+  constructor({
+    serverID,
+    ipcServer,
+    globalConfig,
+    concurrency })
+
+
+
+
+
+  {
+    this._workerID = (0, _utils.makeUniqWorkerId)();
+    this._serverID = serverID;
+    this._ipcServer = ipcServer;
+    this._globalConfig = globalConfig;
+    this._concurrency = concurrency;
+    this._alive = false;
+    this._runningTests = new Map();
+  }
+
+  _spawnSubprocess() {
+    const { _serverID: serverID, _workerID: workerID } = this;
+    const injectedCodePath = require.resolve(
+    './electron_process_injected_code.js');
+
+    return (0, _child_process.spawn)('electron', [injectedCodePath], {
+      stdio: [
+      'inherit',
+      // redirect child process' stdout to parent process stderr, so it
+      // doesn't break any tools that depend on stdout (like the ones
+      // that consume a generated JSON report from jest's stdout)
+      process.stderr,
+      'inherit'],
+
+      env: _extends({},
+      process.env, {
+        JEST_SERVER_ID: serverID,
+        JEST_WORKER_ID: workerID }),
+
+      detached: true });
+
+  }
+  async start() {
+    return new Promise(resolve => {
+      this._ipcServer.on(this._workerID, (message, socket) => {
+        const { messageType, data } = (0, _utils.parseMessage)(message);
+        switch (messageType) {
+          case _utils.MESSAGE_TYPES.INITIALIZE:{
+              if (!this._alive) {
+                this._alive = true;
+                this._socket = socket;
+                resolve();
+              } else {
+                // TODO: handle properly
+                throw new Error(
+                `INITIALIZE message was received more than once for this worker: ${message}`);
+
+              }
+              break;
+            }
+          default:{
+              this._onMessage({ messageType, data });
+            }}
+
+      });
+      this._subprocess = this._spawnSubprocess();
+    });
+  }
+  _onMessage({ messageType, data }) {
+    switch (messageType) {
+      case _utils.MESSAGE_TYPES.TEST_RESULT:{
+          const testResult = (0, _utils.parseJSON)(data);
+          const { testFilePath } = testResult;
+          const runningTest = this._runningTests.get(testFilePath);
+          if (!runningTest) {
+            throw new Error(`
+                Can't find any references to the test result that returned from the worker.
+                returned test path: ${testFilePath}
+                list of tests that we know has been running in the worker:
+                ${Array.from(this._runningTests).
+            map(([key, _]) => key).
+            join(', ')}
+                `);
+          }
+
+          testResult.testExecError != null ?
+          // $FlowFixMe jest expects it to be rejected with an object
+          runningTest.reject(testResult.testExecError) :
+          runningTest.resolve(testResult);
+          this._runningTests.delete(testFilePath);
+        }}
+
+  }
+
+  send(message) {
+    if (!this._socket || !this._alive || !this._workerID) {
+      throw new Error("Can't interact with the worker before it comes alive");
+    }
+    this._ipcServer.emit(this._socket, this._workerID, message);
+  }
+
+  async stop() {
+    this.send((0, _utils.makeMessage)({ messageType: _utils.MESSAGE_TYPES.SHUT_DOWN }));
+    this._subprocess.on('error', error => {
+      console.error('ERROR:', error);
+      console.error('ERROR:', error);
+    });
+    process.kill(-this._subprocess.pid);
+    this._subprocess.kill();
+    // not gonna work on win
+    // execSync(`pkill -P ${this._subprocess.pid}`);
+  }
+  async runTest(test, onStart) {
+    if (this._runningTests.has(test.path)) {
+      throw new Error(
+      "Can't run the same test in the same worker at the same time");
+
+    }
+    return new Promise((resolve, reject) => {
+      // Ideally we don't want to pass all thing info with every test
+      // because it never changes. We should try to initialize it
+      // when the worker starts and keep it there for the whole run
+      // (if it's a single run and not a watch mode of course, in that case
+      // it'll be able to change)
+      const rawModuleMap = test.context.moduleMap.getRawModuleMap();
+      const config = test.context.config;
+      const globalConfig = this._globalConfig;
+
+      this.send(
+      (0, _utils.makeMessage)({
+        messageType: _utils.MESSAGE_TYPES.RUN_TEST,
+        data: JSON.stringify({
+          rawModuleMap,
+          config,
+          globalConfig,
+          path: test.path }) }));
+
+
+
+
+      this._runningTests.set(test.path, { resolve, reject });
+    });
+  }}exports.default = ElectronProcess;

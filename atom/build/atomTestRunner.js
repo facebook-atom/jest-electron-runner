@@ -15,16 +15,37 @@
 
 
 
-
-
-
-
-
 var _os = require('os');var _os2 = _interopRequireDefault(_os);
 var _run_test = require('jest-runner/build/run_test');var _run_test2 = _interopRequireDefault(_run_test);
 var _jestRuntime = require('jest-runtime');var _jestRuntime2 = _interopRequireDefault(_jestRuntime);
 var _jestHasteMap = require('jest-haste-map');var _jestHasteMap2 = _interopRequireDefault(_jestHasteMap);
-var _patchAtomConsole = require('nuclide-commons/patch-atom-console');var _patchAtomConsole2 = _interopRequireDefault(_patchAtomConsole);
+
+var _console = require('console');
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 var _utils = require('./utils');
 
@@ -33,29 +54,27 @@ var _utils = require('./utils');
 
 
 
-var _ipcClient = require('./ipc-client');function _interopRequireDefault(obj) {return obj && obj.__esModule ? obj : { default: obj };}
-
-
-const ATOM_BUILTIN_MODULES = new Set(['atom', 'electron']); /**
-                                                             * Copyright (c) 2017-present, Facebook, Inc.
-                                                             * All rights reserved.
-                                                             *
-                                                             * This source code is licensed under the BSD-style license found in the
-                                                             * LICENSE file in the root directory of this source tree. An additional grant
-                                                             * of patent rights can be found in the PATENTS file in the same directory.
-                                                             *
-                                                             * 
-                                                             * @format
-                                                             */ /* eslint-disable no-console */ /* eslint-disable nuclide-internal/no-commonjs */ /*
-                                                                                                                                                   * This file will be injected into an Atom process. It will start an IPC
-                                                                                                                                                   * client, find the parant Jest IPC server that spawned this process and say
-                                                                                                                                                   * "hey! i'm up and ready to run tests, send them over!"
-                                                                                                                                                   */process.on('uncaughtException', err => {console.error(err.stack);process.exit(1);});module.exports = async function (params) {(0, _patchAtomConsole2.default)();
-  const firstTestPath = params.testPaths[0];
-
-  // We pass server and worker IDs via a basename of non-existing file.
-  // Yeah.. it's weird, i know! :(
-  const { serverID, workerID } = (0, _utils.extractIPCIDsFromFilePath)(firstTestPath);
+var _ipcClient = require('./ipc-client');function _interopRequireDefault(obj) {return obj && obj.__esModule ? obj : { default: obj };} /**
+                                                                                                                                        * This should only be used in Atom test contexts!
+                                                                                                                                        * Atom tests normally only display console output in the renderer devtools,
+                                                                                                                                        * which makes debugging difficult in headless mode.
+                                                                                                                                        * This overwrites global.console with a patched console that writes to both
+                                                                                                                                        * the devtools and regular stdio.
+                                                                                                                                        */ /**
+                                                                                                                                            * Copyright (c) 2014-present, Facebook, Inc. All rights reserved.
+                                                                                                                                            *
+                                                                                                                                            * This source code is licensed under the MIT license found in the
+                                                                                                                                            * LICENSE file in the root directory of this source tree.
+                                                                                                                                            *
+                                                                                                                                            * 
+                                                                                                                                            * @format
+                                                                                                                                            */ /*
+                                                                                                                                                * This file will be injected into an Atom process. It will start an IPC
+                                                                                                                                                * client, find the parant Jest IPC server that spawned this process and say
+                                                                                                                                                * "hey! i'm up and ready to run tests, send them over!"
+                                                                                                                                                */const patchAtomConsole = () => {const mainConsole = new _console.Console(process.stdout, process.stderr);const rendererConsole = global.console;const mergedConsole = {};Object.getOwnPropertyNames(rendererConsole).filter(prop => typeof rendererConsole[prop] === 'function').forEach(prop => {mergedConsole[prop] = typeof mainConsole[prop] === 'function' ? (...args) => {mainConsole[prop](...args);return rendererConsole[prop](...args);} : (...args) => rendererConsole[prop](...args);});global.console = mergedConsole;}; // $FlowFixMe
+const ATOM_BUILTIN_MODULES = new Set(['atom', 'electron']);process.on('uncaughtException', err => {console.error(err.stack);process.exit(1);});module.exports = async function (params) {patchAtomConsole();const firstTestPath = params.testPaths[0];
+  const { serverID, workerID } = (0, _utils.getIPCIDs)();
   const connection = await (0, _ipcClient.connectToIPCServer)({
     serverID,
     workerID });

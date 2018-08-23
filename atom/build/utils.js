@@ -1,4 +1,4 @@
-'use strict';Object.defineProperty(exports, "__esModule", { value: true });exports.buildFailureTestResult = exports.parseMessage = exports.makeMessage = exports.parseJSON = exports.MESSAGE_TYPES = exports.extractIPCIDsFromFilePath = exports.parseIPCIDs = exports.mergeIPCIDs = exports.makeUniqWorkerId = exports.makeUniqServerId = exports.rand = undefined;
+'use strict';Object.defineProperty(exports, "__esModule", { value: true });exports.buildFailureTestResult = exports.parseMessage = exports.makeMessage = exports.parseJSON = exports.MESSAGE_TYPES = exports.getIPCIDs = exports.makeUniqWorkerId = exports.makeUniqServerId = exports.invariant = exports.rand = undefined;
 
 
 
@@ -23,29 +23,25 @@ var _jestMessageUtil = require('jest-message-util');function _interopRequireDefa
  *
  * 
  * @format
- */const IPC_IDS_SEPARATOR = '_';const rand = exports.rand = () => Math.floor(Math.random() * 10000000);const makeUniqServerId = exports.makeUniqServerId = () => `jest-atom-runner-ipc-server-${Date.now() + rand()}`;const makeUniqWorkerId = exports.makeUniqWorkerId = () =>
-`jest-atom-runner-ipc-worker-${Date.now() + rand()}`;
-
-const mergeIPCIDs = exports.mergeIPCIDs = ({
-  serverID,
-  workerID }) =>
-
-
-
-`${serverID}${IPC_IDS_SEPARATOR}${workerID}`;
-
-const parseIPCIDs = exports.parseIPCIDs = mergedIDs => {
-  const [serverID, workerID] = mergedIDs.split(IPC_IDS_SEPARATOR);
-  return { serverID, workerID };
+ */const IPC_IDS_SEPARATOR = '_';const rand = exports.rand = () => Math.floor(Math.random() * 10000000);const invariant = exports.invariant = (condition, message) => {if (!condition) {throw new Error(message || 'Invariant violation.');}
 };
 
-// The only way atom allows us to pass data to it is in the form of a file path.
-// So we pass a non-existing file path to it that encodes server and worker IDs,
-// that we later parse and use to communicate back with the parent process.
-const extractIPCIDsFromFilePath = exports.extractIPCIDsFromFilePath =
-passedFilePath =>
-{
-  const { serverID, workerID } = parseIPCIDs(_path2.default.basename(passedFilePath));
+const makeUniqServerId = exports.makeUniqServerId = () =>
+`jest-atom-runner-ipc-server-${Date.now() + rand()}`;
+
+const makeUniqWorkerId = exports.makeUniqWorkerId = () =>
+`jest-atom-runner-ipc-worker-${Date.now() + rand()}`;
+
+const validateIPCID = id => {
+  if (typeof id === 'string' && id.match(/ipc/)) {
+    return id;
+  }
+  throw new Error(`Invalid IPC id: "${JSON.stringify(id)}"`);
+};
+
+const getIPCIDs = exports.getIPCIDs = () => {
+  const serverID = validateIPCID(process.env.JEST_SERVER_ID);
+  const workerID = validateIPCID(process.env.JEST_WORKER_ID);
   return { serverID, workerID };
 };
 
@@ -134,8 +130,6 @@ globalConfig) =>
   rand,
   makeUniqServerId,
   makeUniqWorkerId,
-  extractIPCIDsFromFilePath,
-  mergeIPCIDs,
   parseMessage,
   makeMessage,
   MESSAGE_TYPES,

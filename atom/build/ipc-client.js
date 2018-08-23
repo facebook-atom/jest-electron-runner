@@ -17,6 +17,7 @@
 
 
 
+
 var _nodeIpc = require('node-ipc');var _nodeIpc2 = _interopRequireDefault(_nodeIpc);
 var _utils = require('./utils');function _interopRequireDefault(obj) {return obj && obj.__esModule ? obj : { default: obj };} /**
                                                                                                                                * Copyright (c) 2017-present, Facebook, Inc.
@@ -36,6 +37,7 @@ var _utils = require('./utils');function _interopRequireDefault(obj) {return obj
   connected = true;
 
   _nodeIpc2.default.config.id = serverID;
+  _nodeIpc2.default.config.silent = true;
   _nodeIpc2.default.config.retry = 1500;
 
   return new Promise(resolve => {
@@ -56,7 +58,8 @@ var _utils = require('./utils');function _interopRequireDefault(obj) {return obj
         send: message => _nodeIpc2.default.of[serverID].emit(workerID, message),
         onMessage: fn => {
           onMessageCallbacks.push(fn);
-        } });
+        },
+        disconnect: () => _nodeIpc2.default.disconnect(workerID) });
 
     });
   });

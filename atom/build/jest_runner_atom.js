@@ -1,4 +1,4 @@
-'use strict';Object.defineProperty(exports, "__esModule", { value: true });
+'use strict';
 
 
 
@@ -8,12 +8,7 @@
 
 
 
-
-
-
-
-
-
+var _jest_runner = require('./jest_runner');var _jest_runner2 = _interopRequireDefault(_jest_runner);
 var _AtomTestWorker = require('./AtomTestWorker');var _AtomTestWorker2 = _interopRequireDefault(_AtomTestWorker);function _interopRequireDefault(obj) {return obj && obj.__esModule ? obj : { default: obj };} /**
                                                                                                                                                                                                                 * Copyright (c) 2014-present, Facebook, Inc. All rights reserved.
                                                                                                                                                                                                                 *
@@ -22,69 +17,4 @@ var _AtomTestWorker = require('./AtomTestWorker');var _AtomTestWorker2 = _intero
                                                                                                                                                                                                                 *
                                                                                                                                                                                                                 *  strict-local
                                                                                                                                                                                                                 * @format
-                                                                                                                                                                                                                */ /* An abstraction that acts as a sempaphore for Atom workers. */class AtomTestWorkerFarm {
-
-
-  constructor({
-    ipcServer,
-    serverID,
-    globalConfig,
-    concurrency })
-
-
-
-
-
-  {
-    if (concurrency < 1) {
-      throw new Error(
-      `concurrency has to be greater than 1, given: ${concurrency}`);
-
-    }
-    this._workers = [];
-    this._queue = [];
-    for (let i = 0; i < concurrency; i++) {
-      const worker = new _AtomTestWorker2.default({ ipcServer, serverID, globalConfig });
-      this._workers.push(worker);
-    }
-  }
-
-  async start() {
-    await Promise.all(this._workers.map(w => w.start())).then(results =>
-    results.forEach(() => this._processNext()));
-
-  }
-
-  async stop() {
-    await Promise.all(this._workers.map(w => w.stop()));
-  }
-
-  _processNext() {
-    const availableWorker = this._workers.find(w => !w.isBusy());
-    if (availableWorker) {
-      const nextInQueue = this._queue.shift();
-      if (nextInQueue) {
-        nextInQueue.onStart(nextInQueue.test);
-        availableWorker.
-        runTest(nextInQueue.test).
-        then(testResult => {
-          nextInQueue.resolve(testResult);
-          this._processNext();
-        }).
-        catch(error => {
-          nextInQueue.reject(error);
-          this._processNext();
-        });
-      }
-    }
-  }
-
-  runTest(test, onStart) {
-    return new Promise((resolve, reject) => {
-      this._queue.push({ test, resolve, reject, onStart });
-      this._processNext();
-    });
-  }}exports.default =
-
-
-AtomTestWorkerFarm;
+                                                                                                                                                                                                                */class AtomJestRunner extends _jest_runner2.default {}AtomJestRunner.TestWorker = _AtomTestWorker2.default;module.exports = AtomJestRunner;

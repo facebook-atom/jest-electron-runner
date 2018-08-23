@@ -1,27 +1,23 @@
 /**
- * Copyright (c) 2017-present, Facebook, Inc.
- * All rights reserved.
+ * Copyright (c) 2014-present, Facebook, Inc. All rights reserved.
  *
- * This source code is licensed under the BSD-style license found in the
- * LICENSE file in the root directory of this source tree. An additional grant
- * of patent rights can be found in the PATENTS file in the same directory.
+ * This source code is licensed under the MIT license found in the
+ * LICENSE file in the root directory of this source tree.
  *
  * @flow strict-local
  * @format
  */
 
-/* An abstroction that acts as a sempaphore for Atom workers. */
-
-/* eslint-disable nuclide-internal/no-commonjs */
+/* An abstraction that acts as a sempaphore for Atom workers. */
 
 import type {ServerID} from './utils';
 import type {IPCServer} from './ipc-server';
 import type {Test, GlobalConfig, TestResult} from './types';
+import typeof TTestWorkerClass from './TestWorker';
+import type TTestWorker from './TestWorker';
 
-import AtomTestWorker from './AtomTestWorker';
-
-class AtomTestWorkerFarm {
-  _workers: Array<AtomTestWorker>;
+export default class TestWorkerFarm {
+  _workers: Array<TTestWorker>;
   _queue: Array<{
     test: Test,
     onStart: Test => void,
@@ -34,11 +30,13 @@ class AtomTestWorkerFarm {
     serverID,
     globalConfig,
     concurrency,
+    TestWorker,
   }: {
     ipcServer: IPCServer,
     serverID: ServerID,
     globalConfig: GlobalConfig,
     concurrency: number,
+    TestWorker: TTestWorkerClass,
   }) {
     if (concurrency < 1) {
       throw new Error(
@@ -48,7 +46,7 @@ class AtomTestWorkerFarm {
     this._workers = [];
     this._queue = [];
     for (let i = 0; i < concurrency; i++) {
-      const worker = new AtomTestWorker({ipcServer, serverID, globalConfig});
+      const worker = new TestWorker({ipcServer, serverID, globalConfig});
       this._workers.push(worker);
     }
   }
@@ -90,5 +88,3 @@ class AtomTestWorkerFarm {
     });
   }
 }
-
-export default AtomTestWorkerFarm;

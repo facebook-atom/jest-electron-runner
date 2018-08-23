@@ -15,9 +15,9 @@ module.exports = {
   displayName: 'atom',
   rootDir: p(''),
   roots: [p('')],
-  testMatch: ['**/__atom_tests__/**/*.js?(x)'],
-  runner: p('atom/build/jest_runner_atom.js'),
+  testMatch: ['**/__electron_tests__/**/*.js?(x)'],
+  runner: p('atom/build/electron/index.js'),
   testRunner: require.resolve('jest-circus/runner'),
-  testEnvironment: p('atom/build/environment_atom.js'),
+  testEnvironment: p('atom/build/environment_electron.js'),
   testPathIgnorePatterns: ['/node_modules/'],
 };

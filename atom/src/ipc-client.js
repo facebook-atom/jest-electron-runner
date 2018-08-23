@@ -15,6 +15,7 @@ import type {ServerID, WorkerID} from './utils';
 export type IPCWorker = {
   onMessage((message: string) => void): void,
   send(message: string): void,
+  disconnect(): void,
 };
 
 import ipc from 'node-ipc';
@@ -36,6 +37,7 @@ export const connectToIPCServer = ({
   connected = true;
 
   ipc.config.id = serverID;
+  ipc.config.silent = true;
   ipc.config.retry = 1500;
 
   return new Promise(resolve => {
@@ -57,6 +59,7 @@ export const connectToIPCServer = ({
         onMessage: fn => {
           onMessageCallbacks.push(fn);
         },
+        disconnect: () => ipc.disconnect(workerID),
       });
     });
   });

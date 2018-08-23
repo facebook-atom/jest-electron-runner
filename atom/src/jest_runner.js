@@ -1,10 +1,8 @@
 /**
- * Copyright (c) 2017-present, Facebook, Inc.
- * All rights reserved.
+ * Copyright (c) 2014-present, Facebook, Inc. All rights reserved.
  *
- * This source code is licensed under the BSD-style license found in the
- * LICENSE file in the root directory of this source tree. An additional grant
- * of patent rights can be found in the PATENTS file in the same directory.
+ * This source code is licensed under the MIT license found in the
+ * LICENSE file in the root directory of this source tree.
  *
  * @flow strict-local
  * @format
@@ -21,26 +19,31 @@ import type {GlobalConfig, Test, TestResult, Watcher} from './types';
 import type {ServerID} from './utils';
 
 import {startServer} from './ipc-server';
-import {makeUniqServerId} from './utils';
+import {makeUniqServerId, invariant} from './utils';
 
-import AtomTestWorkerFarm from './AtomTestWorkerFarm';
+import TestWorkerFarm from './TestWorkerFarm';
+import typeof TTestWorkerClass from './TestWorker';
+import typeof TTestWorkerFarmClass from './TestWorkerFarm';
 
 // Share ipc server and farm between multiple runs, so we don't restart
 // the whole thing in watch mode every time. (it steals window focus when
 // atom launches)
 let ipcServerPromise;
 let serverID;
-let farm;
+let farm: TestWorkerFarm;
 let cleanupRegistered = false;
 
-class TestRunner {
+export default class TestRunner {
   _globalConfig: GlobalConfig;
   _serverID: ServerID;
   _ipcServerPromise: Promise<IPCServer>;
+  static TestWorker: ?TTestWorkerClass;
+  static TestWorkerFarm: ?TTestWorkerFarmClass;
 
   constructor(globalConfig: GlobalConfig) {
     this._globalConfig = globalConfig;
     serverID = serverID || (serverID = makeUniqServerId());
+    this._serverID = serverID;
     ipcServerPromise ||
       (ipcServerPromise = startServer({
         serverID: this._serverID,
@@ -62,12 +65,18 @@ class TestRunner {
         1
       : Math.min(tests.length, this._globalConfig.maxWorkers);
     const ipcServer = await ipcServerPromise;
+
     if (!farm) {
-      farm = new AtomTestWorkerFarm({
+      const {TestWorker} = this.constructor;
+      const TestWorkerFarmClass =
+        this.constructor.TestWorkerFarm || TestWorkerFarm;
+      invariant(TestWorker);
+      farm = new TestWorkerFarmClass({
         serverID: this._serverID,
         ipcServer: await ipcServer,
         globalConfig: this._globalConfig,
         concurrency,
+        TestWorker,
       });
       await farm.start();
     }
@@ -100,5 +109,3 @@ class TestRunner {
     }
   }
 }
-
-module.exports = TestRunner;

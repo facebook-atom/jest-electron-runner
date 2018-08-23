@@ -20,32 +20,28 @@ const IPC_IDS_SEPARATOR = '_';
 
 export const rand = () => Math.floor(Math.random() * 10000000);
 
+export const invariant = (condition: any, message?: string) => {
+  if (!condition) {
+    throw new Error(message || 'Invariant violation.');
+  }
+};
+
 export const makeUniqServerId = (): ServerID =>
   `jest-atom-runner-ipc-server-${Date.now() + rand()}`;
 
 export const makeUniqWorkerId = (): WorkerID =>
   `jest-atom-runner-ipc-worker-${Date.now() + rand()}`;
 
-export const mergeIPCIDs = ({
-  serverID,
-  workerID,
-}: {
-  serverID: ServerID,
-  workerID: WorkerID,
-}) => `${serverID}${IPC_IDS_SEPARATOR}${workerID}`;
-
-export const parseIPCIDs = (mergedIDs: IPCID) => {
-  const [serverID, workerID] = mergedIDs.split(IPC_IDS_SEPARATOR);
-  return {serverID, workerID};
+const validateIPCID = (id: ?string): string => {
+  if (typeof id === 'string' && id.match(/ipc/)) {
+    return id;
+  }
+  throw new Error(`Invalid IPC id: "${JSON.stringify(id)}"`);
 };
 
-// The only way atom allows us to pass data to it is in the form of a file path.
-// So we pass a non-existing file path to it that encodes server and worker IDs,
-// that we later parse and use to communicate back with the parent process.
-export const extractIPCIDsFromFilePath = (
-  passedFilePath: string,
-): {serverID: ServerID, workerID: WorkerID} => {
-  const {serverID, workerID} = parseIPCIDs(path.basename(passedFilePath));
+export const getIPCIDs = (): {serverID: ServerID, workerID: WorkerID} => {
+  const serverID = validateIPCID(process.env.JEST_SERVER_ID);
+  const workerID = validateIPCID(process.env.JEST_WORKER_ID);
   return {serverID, workerID};
 };
 
@@ -134,8 +130,6 @@ export default {
   rand,
   makeUniqServerId,
   makeUniqWorkerId,
-  extractIPCIDsFromFilePath,
-  mergeIPCIDs,
   parseMessage,
   makeMessage,
   MESSAGE_TYPES,

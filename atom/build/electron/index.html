@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="UTF-8">
+    <title>Hi!</title>
+</head>
+
+<body>
+    <script>
+        const { Console } = require('console')
+        const patchConsole = () => {
+            const mainConsole = new Console(process.stdout, process.stderr);
+            const rendererConsole = global.console;
+            const mergedConsole = {};
+            Object.getOwnPropertyNames(rendererConsole)
+                .filter(prop => typeof rendererConsole[prop] === 'function')
+                .forEach(prop => {
+                    mergedConsole[prop] =
+                        typeof mainConsole[prop] === 'function'
+                            ? (...args) => {
+                                mainConsole[prop](...args);
+                                return rendererConsole[prop](...args);
+                            }
+                            : (...args) => rendererConsole[prop](...args);
+                });
+            delete global.console;
+            global.console = mergedConsole;
+        };
+        patchConsole();
+
+        require('./browser_window_injected_code.js')
+    </script>
+</body>
+
+</html>
