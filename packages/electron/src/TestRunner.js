@@ -25,7 +25,7 @@ let serverID;
 let electronProcess;
 let cleanupRegistered = false;
 
-class TestRunner {
+export default class TestRunner {
   _globalConfig: GlobalConfig;
   _serverID: ServerID;
   _ipcServerPromise: Promise<IPCServer>;
@@ -94,5 +94,3 @@ class TestRunner {
     }
   }
 }
-
-module.exports = TestRunner;
