@@ -9,4 +9,5 @@
 
 test('test', () => {
   expect(1).toBe(1);
+  expect(window.abc).not.toBeDefined();
 });

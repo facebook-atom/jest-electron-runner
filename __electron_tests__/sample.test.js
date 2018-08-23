@@ -7,7 +7,12 @@
  * @flow
  */
 
-test('test', () => {
+test('test', async () => {
   expect(1).toBe(1);
   expect(window).toBeDefined();
+  window.abc = 11111111111111111;
+  expect(window.abc).toMatchSnapshot();
+  return new Promise(r => {
+    setTimeout(r, 500);
+  });
 });

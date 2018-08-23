@@ -14,20 +14,21 @@
 
 var _ipcServer = require('../ipc-server');
 var _utils = require('../utils');
-var _ElectronProcess = require('./ElectronProcess');var _ElectronProcess2 = _interopRequireDefault(_ElectronProcess);function _interopRequireDefault(obj) {return obj && obj.__esModule ? obj : { default: obj };}
+var _ElectronProcess = require('./ElectronProcess');var _ElectronProcess2 = _interopRequireDefault(_ElectronProcess);
+var _throat = require('throat');var _throat2 = _interopRequireDefault(_throat);function _interopRequireDefault(obj) {return obj && obj.__esModule ? obj : { default: obj };}
 
 // Share ipc server and farm between multiple runs, so we don't restart
 // the whole thing in watch mode every time. (it steals window focus when
 // atom launches)
-/**
- * Copyright (c) 2014-present, Facebook, Inc. All rights reserved.
- *
- * This source code is licensed under the MIT license found in the
- * LICENSE file in the root directory of this source tree.
- *
- *  strict-local
- * @format
- */let ipcServerPromise;let serverID;let electronProcess;let cleanupRegistered = false;class TestRunner {
+let ipcServerPromise; /**
+                       * Copyright (c) 2014-present, Facebook, Inc. All rights reserved.
+                       *
+                       * This source code is licensed under the MIT license found in the
+                       * LICENSE file in the root directory of this source tree.
+                       *
+                       *  strict-local
+                       * @format
+                       */let serverID;let electronProcess;let cleanupRegistered = false;class TestRunner {
 
   constructor(globalConfig) {
     this._globalConfig = globalConfig;
@@ -78,12 +79,14 @@ var _ElectronProcess = require('./ElectronProcess');var _ElectronProcess2 = _int
     }
 
     await Promise.all(
-    tests.map(test => {
+    tests.map(
+    (0, _throat2.default)(concurrency, test => {
       return electronProcess.
       runTest(test, onStart).
       then(testResult => onResult(test, testResult)).
       catch(error => onFailure(test, error));
-    }));
+    })));
+
 
 
     if (!isWatch) {

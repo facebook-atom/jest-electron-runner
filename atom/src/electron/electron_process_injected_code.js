@@ -25,6 +25,7 @@ import {
   parseMessage,
   parseJSON,
   makeMessage,
+  makeUniqWorkerId,
   buildFailureTestResult,
 } from '../utils';
 import os from 'os';
@@ -34,22 +35,17 @@ import HasteMap from 'jest-haste-map';
 
 const appReady = new Promise(r => app.on('ready', r));
 
-const _runTest = (
-  testData,
-  // testData.path,
-  // testData.globalConfig,
-  // testData.config,
-  // testData.rawModuleMap,
-  // getResolver(testData.config, testData.rawModuleMap),
-) => {
+const _runTest = testData => {
   return new Promise(resolve => {
+    const workerID = makeUniqWorkerId();
     const win = new BrowserWindow({show: false});
     win.loadURL(`file://${require.resolve('./index.html')}`);
     win.webContents.on('did-finish-load', () => {
-      win.webContents.send('run-test', testData);
+      win.webContents.send('run-test', {testData, workerID});
     });
 
-    ipcMain.on('testfinished', (event, data) => {
+    ipcMain.once(workerID, (event, data) => {
+      win.destroy();
       resolve(data);
     });
   });
@@ -57,6 +53,10 @@ const _runTest = (
 
 const start = async () => {
   await appReady;
+  // electron automatically quits if all windows are destroyed,
+  // this mainWindow will keep electron running even if all other windows
+  // are gone. There's probably a better way to do it.
+  const mainWindow = new BrowserWindow({show: false});
   return new Promise(async resolve => {
     const {serverID, workerID} = getIPCIDs();
     const connection: IPCWorker = await connectToIPCServer({
@@ -93,6 +93,7 @@ const start = async () => {
           case MESSAGE_TYPES.SHUT_DOWN: {
             resolve();
             connection.disconnect();
+            mainWindow.destroy();
             // process.exit(0);
             break;
           }

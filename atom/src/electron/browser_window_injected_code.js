@@ -13,7 +13,7 @@ import HasteMap from 'jest-haste-map';
 // $FlowFixMe
 import {ipcRenderer} from 'electron';
 
-ipcRenderer.on('run-test', async (event, testData) => {
+ipcRenderer.on('run-test', async (event, {testData, workerID}) => {
   try {
     const result = await runTest(
       testData.path,
@@ -22,9 +22,7 @@ ipcRenderer.on('run-test', async (event, testData) => {
       getResolver(testData.config, testData.rawModuleMap),
     );
 
-    ipcRenderer.send('test', 111);
-    ipcRenderer.send('testfinished', result);
-    window.close();
+    ipcRenderer.send(workerID, result);
   } catch (e) {
     console.error(e);
   }

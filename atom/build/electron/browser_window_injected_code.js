@@ -19,12 +19,10 @@ var _electron = require('electron');function _interopRequireDefault(obj) {return
                                                                                                                                    *
                                                                                                                                    * 
                                                                                                                                    * @format
-                                                                                                                                   */_electron.ipcRenderer.on('run-test', async (event, testData) => {try {const result = await (0, _run_test2.default)(testData.path, testData.globalConfig, testData.config, getResolver(testData.config, testData.rawModuleMap));
+                                                                                                                                   */_electron.ipcRenderer.on('run-test', async (event, { testData, workerID }) => {try {const result = await (0, _run_test2.default)(testData.path, testData.globalConfig, testData.config, getResolver(testData.config, testData.rawModuleMap));
 
 
-    _electron.ipcRenderer.send('test', 111);
-    _electron.ipcRenderer.send('testfinished', result);
-    window.close();
+    _electron.ipcRenderer.send(workerID, result);
   } catch (e) {
     console.error(e);
   }

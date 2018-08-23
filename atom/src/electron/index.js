@@ -15,6 +15,7 @@ import type {ServerID} from '../utils';
 import {startServer} from '../ipc-server';
 import {makeUniqServerId, invariant} from '../utils';
 import ElectronProcess from './ElectronProcess';
+import throat from 'throat';
 
 // Share ipc server and farm between multiple runs, so we don't restart
 // the whole thing in watch mode every time. (it steals window focus when
@@ -78,12 +79,14 @@ class TestRunner {
     }
 
     await Promise.all(
-      tests.map(test => {
-        return electronProcess
-          .runTest(test, onStart)
-          .then(testResult => onResult(test, testResult))
-          .catch(error => onFailure(test, error));
-      }),
+      tests.map(
+        throat(concurrency, test => {
+          return electronProcess
+            .runTest(test, onStart)
+            .then(testResult => onResult(test, testResult))
+            .catch(error => onFailure(test, error));
+        }),
+      ),
     );
 
     if (!isWatch) {

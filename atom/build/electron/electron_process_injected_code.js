@@ -27,6 +27,7 @@ var _utils = require('../utils');
 
 
 
+
 var _os = require('os');var _os2 = _interopRequireDefault(_os);
 var _run_test = require('jest-runner/build/run_test');var _run_test2 = _interopRequireDefault(_run_test);
 var _jestRuntime = require('jest-runtime');var _jestRuntime2 = _interopRequireDefault(_jestRuntime);
@@ -40,16 +41,11 @@ var _jestHasteMap = require('jest-haste-map');var _jestHasteMap2 = _interopRequi
                                                                                                                                                                                                                               * @format
                                                                                                                                                                                                                               */ // $FlowFixMe flow doesn't know about console
 global.console = new _console.Console(process.stdout, process.stderr); // $FlowFixMe
-const appReady = new Promise(r => _electron.app.on('ready', r));const _runTest = testData => // testData.path,
-// testData.globalConfig,
-// testData.config,
-// testData.rawModuleMap,
-// getResolver(testData.config, testData.rawModuleMap),
-{return new Promise(resolve => {const win = new _electron.BrowserWindow({ show: false });win.loadURL(`file://${require.resolve('./index.html')}`);win.webContents.on('did-finish-load', () => {
-      win.webContents.send('run-test', testData);
+const appReady = new Promise(r => _electron.app.on('ready', r));const _runTest = testData => {return new Promise(resolve => {const workerID = (0, _utils.makeUniqWorkerId)();const win = new _electron.BrowserWindow({ show: false });win.loadURL(`file://${require.resolve('./index.html')}`);win.webContents.on('did-finish-load', () => {win.webContents.send('run-test', { testData, workerID });
     });
 
-    _electron.ipcMain.on('testfinished', (event, data) => {
+    _electron.ipcMain.once(workerID, (event, data) => {
+      win.destroy();
       resolve(data);
     });
   });
@@ -57,6 +53,10 @@ const appReady = new Promise(r => _electron.app.on('ready', r));const _runTest =
 
 const start = async () => {
   await appReady;
+  // electron automatically quits if all windows are destroyed,
+  // this mainWindow will keep electron running even if all other windows
+  // are gone. There's probably a better way to do it.
+  const mainWindow = new _electron.BrowserWindow({ show: false });
   return new Promise(async resolve => {
     const { serverID, workerID } = (0, _utils.getIPCIDs)();
     const connection = await (0, _ipcClient.connectToIPCServer)({
@@ -93,6 +93,7 @@ const start = async () => {
           case _utils.MESSAGE_TYPES.SHUT_DOWN:{
               resolve();
               connection.disconnect();
+              mainWindow.destroy();
               // process.exit(0);
               break;
             }}
