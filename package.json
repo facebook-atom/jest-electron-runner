@@ -27,9 +27,7 @@
     "string-length": "^2.0.0"
   },
   "scripts": {
-    "watch-atom": "babel atom/src --out-dir atom/build --watch --copy-files",
-    "build-atom": "babel atom/src --out-dir atom/build --copy-files",
-    "watch-electron": "babel electron/src --out-dir electron/build --watch --copy-files",
-    "build-electron": "babel electron/src --out-dir electron/build --copy-files"
+    "build": "flow-node ./scripts/build",
+    "build-watch": "flow-node ./scripts/build && flow-node ./scripts/build-watch"
   }
 }

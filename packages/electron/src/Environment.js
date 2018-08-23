@@ -14,7 +14,7 @@ import type {ProjectConfig} from '../../../types';
 
 import mock from 'jest-mock';
 
-class Atom {
+export default class ElectronEnvironment {
   global: Object;
   moduleMocker: Object;
   fakeTimers: Object;
@@ -46,5 +46,3 @@ class Atom {
     return script.runInThisContext();
   }
 }
-
-module.exports = Atom;
