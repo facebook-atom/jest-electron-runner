@@ -1,6 +1,6 @@
 {
     "name": "@jest-runner/core",
-    "version": "0.0.2",
+    "version": "0.0.3",
     "description": "Shared code for Jest test runner packages",
     "author": "Aaron Abramov",
     "license": "MIT",
