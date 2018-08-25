@@ -26,6 +26,9 @@
     "prettier": "^1.14.2",
     "string-length": "^2.0.0"
   },
+  "workspaces": [
+    "packages/*"
+  ],
   "scripts": {
     "build": "flow-node ./scripts/build",
     "build-watch": "flow-node ./scripts/build && flow-node ./scripts/build-watch",
