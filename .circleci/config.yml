@@ -1,16 +1,14 @@
 version: 2
 
-machine:
-  xcode:
-    version: 8.2
-
 jobs:
   test:
     docker:
-      - image: circleci/node:10
+      - image: circleci/node:10-browsers
     steps:
       - checkout
       - run: yarn --no-progress
+      - run: yarn build
+      - run: yarn flow
       - run: yarn test
 
 workflows:

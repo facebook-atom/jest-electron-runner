@@ -31,6 +31,7 @@
     "packages/*"
   ],
   "scripts": {
+    "flow": "flow check",
     "build": "flow-node ./scripts/build",
     "build-watch": "flow-node ./scripts/build && flow-node ./scripts/build-watch",
     "clean": "rm -rf ./packages/*/build",

@@ -20,8 +20,11 @@ import {
   parseMessage,
 } from '@jest-runner/core/utils';
 import {spawn, execSync} from 'child_process';
+import path from 'path';
 
 type TestRunResolver = {resolve: TestResult => void, reject: Error => void};
+
+const ELECTRON_BIN = path.resolve(require.resolve('electron'), '..', 'cli.js');
 
 export default class ElectronProcess {
   _alive: boolean;
@@ -59,7 +62,7 @@ export default class ElectronProcess {
     const injectedCodePath = require.resolve(
       './electron_process_injected_code.js',
     );
-    return spawn('electron', [injectedCodePath], {
+    return spawn(ELECTRON_BIN, [injectedCodePath], {
       stdio: [
         'inherit',
         // redirect child process' stdout to parent process stderr, so it
