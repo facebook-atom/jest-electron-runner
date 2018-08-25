@@ -21,6 +21,7 @@
     "babel-preset-flow": "6.23.0",
     "flow-bin": "^0.79.1",
     "flow-remove-types": "^1.2.3",
+    "jest": "^23.5.0",
     "jest-circus": "^23.5.0",
     "lerna": "^3.1.4",
     "prettier": "^1.14.2",
