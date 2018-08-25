@@ -6,6 +6,8 @@ jobs:
       - image: circleci/node:10-browsers
     steps:
       - checkout
+      - run: git submodule update --init fiddle
+      - run: cd fiddle && npm install --no-save
       - run: yarn --no-progress
       - run: yarn build
       - run: yarn flow

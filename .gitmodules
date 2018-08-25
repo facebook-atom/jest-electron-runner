@@ -1,0 +1,3 @@
+[submodule "fiddle"]
+	path = fiddle
+	url = git@github.com:aaronabramov/fiddle.git
