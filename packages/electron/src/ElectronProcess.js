@@ -139,12 +139,9 @@ export default class ElectronProcess {
     this.send(makeMessage({messageType: MESSAGE_TYPES.SHUT_DOWN}));
     this._subprocess.on('error', error => {
       console.error('ERROR:', error);
-      console.error('ERROR:', error);
     });
     process.kill(-this._subprocess.pid);
     this._subprocess.kill();
-    // not gonna work on win
-    // execSync(`pkill -P ${this._subprocess.pid}`);
   }
   async runTest(test: Test, onStart: Test => void): Promise<TestResult> {
     if (this._runningTests.has(test.path)) {

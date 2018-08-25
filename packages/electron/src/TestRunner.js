@@ -4,7 +4,7 @@
  * This source code is licensed under the MIT license found in the
  * LICENSE file in the root directory of this source tree.
  *
- * @flow strict-local
+ * @flow
  * @format
  */
 
@@ -24,6 +24,16 @@ let ipcServerPromise;
 let serverID;
 let electronProcess;
 let cleanupRegistered = false;
+
+const once = fn => {
+  let hasBeenCalled = false;
+  return (...args) => {
+    if (!hasBeenCalled) {
+      hasBeenCalled = true;
+      return fn(...args);
+    }
+  };
+};
 
 export default class TestRunner {
   _globalConfig: GlobalConfig;
@@ -64,19 +74,22 @@ export default class TestRunner {
       await electronProcess.start();
     }
 
-    const cleanup = async () => {
+    const cleanup = once(() => {
       electronProcess.stop();
       ipcServer.stop();
-    };
+    });
 
-    if (!cleanupRegistered) {
-      cleanupRegistered = true;
-      process.on('exit', cleanup);
-      process.on('SIGINT', cleanup);
-      process.on('SIGUSR1', cleanup);
-      process.on('SIGUSR2', cleanup);
-      process.on('uncaughtException', cleanup);
-    }
+    process.on('SIGINT', () => {
+      cleanup();
+      process.exit(130);
+    });
+    process.on('uncaughtException', () => {
+      cleanup();
+      // This will prevent other handlers to handle errors
+      // (e.g. global Jest handler). TODO: find a way to provide
+      // a cleanup function to Jest so it runs it instead
+      process.exit(1);
+    });
 
     await Promise.all(
       tests.map(
