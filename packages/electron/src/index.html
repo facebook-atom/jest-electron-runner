@@ -3,6 +3,8 @@
 
 <head>
     <meta charset="UTF-8">
+    <meta http-equiv="Content-Security-Policy" content="default-src *; img-src blob: data: *; script-src 'self' 'unsafe-eval'; style-src 'self' 'unsafe-inline'; media-src blob: data: mediastream: *;">
+
     <title>Hi!</title>
 </head>
 
@@ -28,9 +30,8 @@
             global.console = mergedConsole;
         };
         patchConsole();
-
-        require('./browser_window_injected_code.js')
     </script>
+    <script src="./browser_window_injected_code.js"></script>
 </body>
 
 </html>
