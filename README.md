@@ -1,3 +1,5 @@
+[![CircleCI](https://circleci.com/gh/facebook-atom/jest-electron-runner.svg?style=svg)](https://circleci.com/gh/facebook-atom/jest-electron-runner)
+
 
 ## Jest electron runner
 A custom test runner for Jest that runs tests inside an [electron](https://electronjs.org/) window environment.
