@@ -8,14 +8,18 @@
  */
 'use strict';
 
+// $FlowFixMe
+const fiddleConfig = require('./fiddle/jest.json');
+
 const path = require('path');
 const p = relative => path.resolve(__dirname, relative);
 
 module.exports = {
-  displayName: '    node',
-  rootDir: p(''),
-  roots: [p('')],
-  testMatch: ['**/__tests__/**/*.js?(x)'],
-  testPathIgnorePatterns: ['/node_modules/'],
-  testEnvironment: 'node',
+  ...fiddleConfig,
+  bail: false,
+  displayName: '  fiddle',
+  rootDir: p('./fiddle'),
+  testPathIgnorePatterns: ['tests/renderer/fetch-types-spec.ts'],
+  runner: p('packages/electron'),
+  testEnvironment: p('packages/electron/environment'),
 };

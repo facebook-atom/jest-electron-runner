@@ -8,5 +8,9 @@
  */
 
 module.exports = {
-  projects: ['jest.config.electron.js', 'jest.config.node.js'],
+  projects: [
+    'jest.config.electron.js',
+    'jest.config.node.js',
+    'jest.config.fiddle.js',
+  ],
 };
