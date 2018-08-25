@@ -4,9 +4,8 @@ A custom test runner for Jest that runs tests inside an [electron](https://elect
 
 ## Getting Started
 
-1. make sure you have electron and jest installed and available in your `$PATH`
-2. Install jest electron runner `yarn add @jest-runner/electron --dev`
-3. Add these lines to your jest config (in `package.json` or inside your `jest.config.js` file)
+1. Install jest electron runner `yarn add @jest-runner/electron --dev`
+2. Add these lines to your jest config (in `package.json` or inside your `jest.config.js` file)
 
 
     ```js
@@ -16,6 +15,7 @@ A custom test runner for Jest that runs tests inside an [electron](https://elect
           testEnvironment: '@jest-runner/electron/environment',
         }
     ```
+3. run jest!
 
 
 <h1 align="center">

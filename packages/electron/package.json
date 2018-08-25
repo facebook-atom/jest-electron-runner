@@ -8,6 +8,7 @@
     "repository": "https://github.com/facebook-atom/jest-electron-runner",
     "dependencies": {
         "@jest-runner/core": "^0.0.2",
+        "electron": "^2.0.8",
         "jest-haste-map": "^23.5.0",
         "jest-runner": "^23.5.0",
         "jest-runtime": "^23.5.0"
