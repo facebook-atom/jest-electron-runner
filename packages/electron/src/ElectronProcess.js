@@ -162,6 +162,8 @@ export default class ElectronProcess {
       const config = test.context.config;
       const globalConfig = this._globalConfig;
 
+      onStart(test);
+
       this.send(
         makeMessage({
           messageType: MESSAGE_TYPES.RUN_TEST,

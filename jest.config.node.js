@@ -16,6 +16,6 @@ module.exports = {
   rootDir: p(''),
   roots: [p('')],
   testMatch: ['**/__tests__/**/*.js?(x)'],
-  testPathIgnorePatterns: ['/node_modules/'],
+  testPathIgnorePatterns: ['/node_modules/', '__fixtures__'],
   testEnvironment: 'node',
 };

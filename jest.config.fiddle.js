@@ -19,7 +19,15 @@ module.exports = {
   bail: false,
   displayName: '  fiddle',
   rootDir: p('./fiddle'),
-  testPathIgnorePatterns: ['tests/renderer/fetch-types-spec.ts'],
+  testPathIgnorePatterns: [
+    'tests/renderer/fetch-types-spec.ts',
+    'fiddle/tests/main/menu-spec.ts',
+    'fiddle/tests/main/files-spec.ts',
+    'fiddle/tests/main/windows-spec.ts',
+    'fiddle/tests/main/dialogs-spec.ts',
+    'fiddle/tests/main/protocol-spec.ts',
+    'fiddle/tests/main/context-menu-spec.ts',
+  ],
   runner: p('packages/electron'),
   testEnvironment: p('packages/electron/environment'),
 };

@@ -7,11 +7,13 @@
  * @flow
  * @format
  */
+
 import runTest from 'jest-runner/build/run_test';
 import Runtime from 'jest-runtime';
 import HasteMap from 'jest-haste-map';
 // $FlowFixMe
 import {ipcRenderer} from 'electron';
+import {buildFailureTestResult} from '@jest-runner/core/utils';
 
 ipcRenderer.on('run-test', async (event, {testData, workerID}) => {
   try {
@@ -24,6 +26,15 @@ ipcRenderer.on('run-test', async (event, {testData, workerID}) => {
 
     ipcRenderer.send(workerID, result);
   } catch (e) {
+    ipcRenderer.send(
+      workerID,
+      buildFailureTestResult(
+        testData.path,
+        e,
+        testData.config,
+        testData.globalConfig,
+      ),
+    );
     console.error(e);
   }
 });
