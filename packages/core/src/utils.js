@@ -32,7 +32,7 @@ export const makeUniqServerId = (): ServerID =>
 export const makeUniqWorkerId = (): WorkerID =>
   `jest-atom-runner-ipc-worker-${Date.now() + rand()}`;
 
-const validateIPCID = (id: ?string): string => {
+export const validateIPCID = (id: ?string): string => {
   if (typeof id === 'string' && id.match(/ipc/)) {
     return id;
   }
