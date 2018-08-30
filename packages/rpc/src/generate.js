@@ -16,7 +16,7 @@ import Docblock from './docblock';
 import crypto from 'crypto';
 import prettier from 'prettier';
 
-const DEFAULT_RPC_PROCESS_PATH = '@jest-runner/rpc/build/RPCProcess';
+const DEFAULT_RPC_PROCESS_PATH = '@jest-runner/rpc/RPCProcess';
 
 type GenerateOptions = {|
   globs: Array<string>,
@@ -102,7 +102,11 @@ const codeGen = async ({
     ' */',
     '',
     `import typeof Methods from '${relativePath(generatedFile, file)}'`,
-    `import RPCProcess from '${relativePath(generatedFile, RPCProcessPath)}';`,
+    `import RPCProcess from '${
+      RPCProcessPath === DEFAULT_RPC_PROCESS_PATH
+        ? RPCProcessPath
+        : relativePath(generatedFile, RPCProcessPath)
+    }';`,
     '',
   ];
 

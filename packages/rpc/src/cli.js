@@ -17,4 +17,9 @@ yargs
 const globs = yargs.argv._;
 const {RPCProcessPath} = yargs.argv;
 
+if (!globs.length) {
+  console.error('no paths provided.');
+  process.exit(1);
+}
+
 generate({globs, RPCProcessPath});

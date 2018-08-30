@@ -1,0 +1,25 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`generation logic 1`] = `
+"/**
+ * ****************************************************
+ * THIS IS A GENERATED FILE. DO NOT MODIFY IT MANUALLY!
+ * ****************************************************
+ * @flow
+ * @generated 67207e6e69ae37366b3c421b7eda63f8
+ */
+
+import typeof Methods from './SomeRPC.js';
+import RPCProcess from '@jest-runner/rpc/RPCProcess';
+
+class SomeRPCProcess extends RPCProcess<Methods> {
+  initializeRemote(): Methods {
+    return {
+      test1: (this.jsonRPCCall.bind(this, 'test1'): any),
+      test2: (this.jsonRPCCall.bind(this, 'test2'): any),
+    };
+  }
+}
+module.exports = SomeRPCProcess;
+"
+`;
