@@ -10,7 +10,7 @@
 
 import type {ServerID, WorkerID} from './utils';
 
-export opaque type Socket = any;
+export type Socket = any;
 
 export type IPCServer = {
   start: () => void,

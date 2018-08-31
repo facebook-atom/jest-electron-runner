@@ -7,7 +7,7 @@
  * @flow
  */
 
-import type {Test, TestResult, GlobalConfig} from '@jest-runner/core/types';
+import type {TestResult} from '@jest-runner/core/types';
 import type {IPCTestData} from '../../types';
 
 import {
@@ -15,7 +15,7 @@ import {
   buildFailureTestResult,
 } from '@jest-runner/core/utils';
 
-import {app, BrowserWindow, ipcMain} from 'electron';
+import {BrowserWindow, ipcMain} from 'electron';
 
 const _runTest = (testData: IPCTestData): Promise<TestResult> => {
   return new Promise(resolve => {

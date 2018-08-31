@@ -7,13 +7,12 @@
  * @flow
  */
 
-import j from 'jscodeshift';
-import globLib from 'glob';
-import path from 'path';
-import mkdirp from 'mkdirp';
-import fs from 'fs';
-import Docblock from './docblock';
 import crypto from 'crypto';
+import Docblock from './docblock';
+import fs from 'fs';
+import globLib from 'glob';
+import j from 'jscodeshift';
+import path from 'path';
 import prettier from 'prettier';
 
 const DEFAULT_RPC_PROCESS_PATH = '@jest-runner/rpc/RPCProcess';
@@ -27,6 +26,7 @@ export const generate = async (options: GenerateOptions) => {
   const files = await prepareFiles(options);
   files.forEach(([filePath, source]) => {
     fs.writeFileSync(filePath, source);
+    // eslint-disable-next-line no-console
     console.log(`write: ${filePath}`);
   });
 };

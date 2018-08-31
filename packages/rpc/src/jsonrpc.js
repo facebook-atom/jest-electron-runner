@@ -53,7 +53,7 @@ export const parseResponse = (json: string) => {
   return obj;
 };
 
-const makeError = (error: any, code: number = 1, data: any) => {
+const makeError = (error: any, code: number = 1) => {
   if (error instanceof Error) {
     return {
       code,

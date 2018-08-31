@@ -8,10 +8,6 @@
  * @format
  */
 
-/* eslint-disable nuclide-internal/no-commonjs */
-
-import type {ProjectConfig} from '@jest-runner/core/types';
-
 import mock from 'jest-mock';
 
 export default class ElectronEnvironment {
@@ -19,10 +15,8 @@ export default class ElectronEnvironment {
   moduleMocker: Object;
   fakeTimers: Object;
 
-  constructor(config: ProjectConfig) {
+  constructor() {
     this.global = global;
-    // __buildAtomGlobal should be set at the atom entry point. It depends
-    // on the data Atom test runner provides.
     this.moduleMocker = new mock.ModuleMocker(global);
     this.fakeTimers = {
       useFakeTimers() {
@@ -31,18 +25,13 @@ export default class ElectronEnvironment {
     };
   }
 
-  async setup() {
-    // make sure we start from a clean state
-    // window.document.body.innerHTML = '';
-  }
+  async setup() {}
 
   async teardown() {}
 
   runScript(script: any): ?any {
-    // unfortunately electron crashes if we try to access anything
-    // on global from within a vm content. The only workaround i found
-    // is to lose sandboxing and run everything in a single context.
-    // We should look into using iframes/webviews in the future.
+    // Since evrey tests runs in a new window we don't need any extra isolation
+    // as we need in Jest node runner
     return script.runInThisContext();
   }
 }

@@ -15,7 +15,6 @@ import {
   serializeResultResponse,
   serializeErrorResponse,
 } from './jsonrpc';
-import {remote} from 'electron';
 
 export default class RPCConnection<
   Methods: {[string]: (...Args: any) => Promise<any>},

@@ -11,15 +11,13 @@
 // and tries to write them every time it runs
 window.ELECTRON_DISABLE_SECURITY_WARNINGS = true;
 
-import type {Test, GlobalConfig} from '@jest-runner/core/types';
 import type {IPCTestData} from '../types';
 
+import {buildFailureTestResult} from '@jest-runner/core/utils';
+import {ipcRenderer} from 'electron';
+import HasteMap from 'jest-haste-map';
 import runTest from 'jest-runner/build/run_test';
 import Runtime from 'jest-runtime';
-import HasteMap from 'jest-haste-map';
-// $FlowFixMe
-import {ipcRenderer} from 'electron';
-import {buildFailureTestResult} from '@jest-runner/core/utils';
 
 // $FlowFixMe
 const {Console} = require('console');
@@ -46,6 +44,7 @@ ipcRenderer.on(
           testData.globalConfig,
         ),
       );
+      // eslint-disable-next-line no-console
       console.error(error);
     }
   },

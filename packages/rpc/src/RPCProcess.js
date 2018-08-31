@@ -7,13 +7,15 @@
  * @flow
  */
 
+/* global child_process$ChildProcess */
+
 import type {ServerID} from './utils';
 import {spawn} from 'child_process';
 import {makeUniqServerId} from './utils';
 import path from 'path';
 import {INITIALIZE_MESSAGE, JSONRPC_EVENT_NAME} from './constants';
 import ipc from 'node-ipc';
-import {makeRequest, serializeRequest, parseResponse} from './jsonrpc';
+import {serializeRequest, parseResponse} from './jsonrpc';
 
 type SpawnFn = ({serverID: ServerID}) => child_process$ChildProcess;
 type SpawnNode = {|
@@ -66,7 +68,7 @@ export default class RPCProcess<Methods> {
           resolve(socket);
         });
 
-        ipc.server.on(JSONRPC_EVENT_NAME, (json, socket) => {
+        ipc.server.on(JSONRPC_EVENT_NAME, json => {
           this.handleJsonRPCResponse(json);
         });
       });

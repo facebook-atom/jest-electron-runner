@@ -8,21 +8,19 @@
  * @format
  */
 
-import type {IPCServer} from '../../core/src/ipc-server';
 import type {
   GlobalConfig,
   Test,
   TestResult,
   Watcher,
 } from '@jest-runner/core/types';
-import type {ServerID} from '../../core/src/utils';
+import type {IPCServer} from '../../core/src/ipc-server';
 
-import {startServer} from '@jest-runner/core/ipc-server';
-import {makeUniqServerId, invariant} from '@jest-runner/core/utils';
-import throat from 'throat';
+import {spawn} from 'child_process';
 import JestWorkerRpcProcess from './rpc/JestWorkerRPCProcess.generated';
 import path from 'path';
-import {spawn} from 'child_process';
+import throat from 'throat';
+import type {ServerID} from '../../core/src/utils';
 
 // Share ipc server and farm between multiple runs, so we don't restart
 // the whole thing in watch mode every time.
@@ -55,7 +53,6 @@ export default class TestRunner {
     onStart: Test => void,
     onResult: (Test, TestResult) => void,
     onFailure: (Test, Error) => void,
-    options: {},
   ) {
     const isWatch = this._globalConfig.watch || this._globalConfig.watchAll;
     const concurrency = isWatch

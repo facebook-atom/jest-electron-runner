@@ -178,7 +178,7 @@ class Docblock {
     const nodes: Array<DocblockNode> = [];
 
     for (const line of docblock.trim().split('\n')) {
-      const matchDirective = line.match(/^\s*@([\w\-]+)/);
+      const matchDirective = line.match(/^\s*@([\w-]+)/);
 
       // It it starts from `@` we always assume that this is a new directive
       if (matchDirective) {

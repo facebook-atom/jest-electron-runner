@@ -18,6 +18,7 @@ const globs = yargs.argv._;
 const {RPCProcessPath} = yargs.argv;
 
 if (!globs.length) {
+  // eslint-disable-next-line no-console
   console.error('no paths provided.');
   process.exit(1);
 }
