@@ -7,4 +7,5 @@
 
 throw new Error('hey');
 
+// eslint-disable-next-line no-unreachable
 test('not gonna run', () => {});

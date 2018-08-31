@@ -11,6 +11,7 @@ jobs:
       - run: yarn --no-progress
       - run: yarn build
       - run: yarn flow
+      - run: yarn lint
       - run: yarn test
 
 workflows:

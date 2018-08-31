@@ -38,7 +38,9 @@
     "build": "flow-node ./scripts/build",
     "build-watch": "flow-node ./scripts/build && flow-node ./scripts/build-watch",
     "clean": "rm -rf ./packages/*/build",
-    "test": "jest"
+    "lint": "eslint .",
+    "test": "jest",
+    "test-all": "yarn flow && yarn test && yarn lint"
   },
   "dependencies": {}
 }

@@ -11,6 +11,9 @@
  * Watch files for changes and rebuild (copy from 'src/' to `build/`) if changed
  */
 
+/* eslint-disable no-console */
+/* eslint-disable no-empty */
+
 const fs = require('fs');
 const {execSync} = require('child_process');
 const path = require('path');

@@ -12,12 +12,6 @@
  * By default it transpiles all files for all packages and writes them
  * into `build/` directory.
  * Non-js or files matching IGNORE_PATTERN will be copied without transpiling.
- *
- * Example:
- *  node ./scripts/build.js
- *  node ./scripts/build.js /users/123/jest/packages/jest-111/src/111.js
- *
- * NOTE: this script is node@4 compatible
  */
 
 'use strict';
@@ -38,7 +32,6 @@ const PACKAGES_DIR = require('./getPackages').PACKAGES_DIR;
 const OK = chalk.reset.inverse.bold.green(' DONE ');
 const SRC_DIR = 'src';
 const BUILD_DIR = 'build';
-const BUILD_ES5_DIR = 'build-es5';
 const JS_FILES_PATTERN = '**/*.js';
 const IGNORE_PATTERN = '**/__{tests,mocks}__/**';
 const INLINE_REQUIRE_BLACKLIST = /.*/;
