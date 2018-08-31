@@ -14,4 +14,7 @@ module.exports = {
   thisWillFail(): Promise<any> {
     return Promise.reject(new Error('hi!'));
   },
+  multipleArgs(a: number, b: string): Promise<[number, string]> {
+    return Promise.resolve([a, b]);
+  },
 };

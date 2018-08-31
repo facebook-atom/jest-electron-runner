@@ -30,6 +30,7 @@ type ConstructorOptions =
 export default class RPCProcess<Methods> {
   server: Object;
   serverID: ServerID;
+  isAlive: boolean;
   _spawn: SpawnFn;
   remote: Methods;
   _socket: any;
@@ -38,6 +39,7 @@ export default class RPCProcess<Methods> {
 
   constructor(options: ConstructorOptions) {
     this.serverID = makeUniqServerId();
+    this.isAlive = false;
 
     this._spawn = options.spawnNode
       ? makeSpawnNodeFn(this.serverID, options.spawnNode)
@@ -60,6 +62,7 @@ export default class RPCProcess<Methods> {
       ipc.serve(() => {
         ipc.server.on(INITIALIZE_MESSAGE, (message, socket) => {
           this.server = ipc.server;
+          this.isAlive = true;
           resolve(socket);
         });
 
@@ -73,16 +76,19 @@ export default class RPCProcess<Methods> {
   }
 
   stop() {
-    this._ensureServerStarted();
-    this.server.stop();
-    process.kill(-this._subprocess.pid);
-    this._subprocess.kill();
+    this.server && this.server.stop();
+    if (this._subprocess) {
+      process.kill(-this._subprocess.pid);
+      this._subprocess.kill();
+    }
+    delete this.server;
+    this.isAlive = false;
   }
 
-  async jsonRPCCall(method: string, args?: Array<any>) {
+  async jsonRPCCall(method: string, ...args: Array<any>) {
     this._ensureServerStarted();
     return new Promise((resolve, reject) => {
-      const {id, json} = serializeRequest(method, [args]);
+      const {id, json} = serializeRequest(method, [...args]);
       this.server.emit(this._socket, JSONRPC_EVENT_NAME, json);
       this._pendingRequests[id] = {
         resolve: data => {

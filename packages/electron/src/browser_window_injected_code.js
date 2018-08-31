@@ -5,8 +5,14 @@
  * LICENSE file in the root directory of this source tree.
  *
  * @flow
- * @format
  */
+
+// For some reason without 'unsafe-eval' electron runner can't read snapshot files
+// and tries to write them every time it runs
+window.ELECTRON_DISABLE_SECURITY_WARNINGS = true;
+
+import type {Test, GlobalConfig} from '@jest-runner/core/types';
+import type {IPCTestData} from '../types';
 
 import runTest from 'jest-runner/build/run_test';
 import Runtime from 'jest-runtime';
@@ -15,29 +21,35 @@ import HasteMap from 'jest-haste-map';
 import {ipcRenderer} from 'electron';
 import {buildFailureTestResult} from '@jest-runner/core/utils';
 
-ipcRenderer.on('run-test', async (event, {testData, workerID}) => {
-  try {
-    const result = await runTest(
-      testData.path,
-      testData.globalConfig,
-      testData.config,
-      getResolver(testData.config, testData.rawModuleMap),
-    );
+// $FlowFixMe
+const {Console} = require('console');
 
-    ipcRenderer.send(workerID, result);
-  } catch (e) {
-    ipcRenderer.send(
-      workerID,
-      buildFailureTestResult(
+ipcRenderer.on(
+  'run-test',
+  async (event, testData: IPCTestData, workerID: string) => {
+    try {
+      const result = await runTest(
         testData.path,
-        e,
-        testData.config,
         testData.globalConfig,
-      ),
-    );
-    console.error(e);
-  }
-});
+        testData.config,
+        getResolver(testData.config, testData.rawModuleMap),
+      );
+
+      ipcRenderer.send(workerID, result);
+    } catch (error) {
+      ipcRenderer.send(
+        workerID,
+        buildFailureTestResult(
+          testData.path,
+          error,
+          testData.config,
+          testData.globalConfig,
+        ),
+      );
+      console.error(error);
+    }
+  },
+);
 
 const ATOM_BUILTIN_MODULES = new Set(['atom', 'electron']);
 
@@ -90,3 +102,23 @@ const getResolver = (config, rawModuleMap) => {
     return resolvers[name];
   }
 };
+
+const patchConsole = () => {
+  const mainConsole = new Console(process.stdout, process.stderr);
+  const rendererConsole = global.console;
+  const mergedConsole = {};
+  Object.getOwnPropertyNames(rendererConsole)
+    .filter(prop => typeof rendererConsole[prop] === 'function')
+    .forEach(prop => {
+      mergedConsole[prop] =
+        typeof mainConsole[prop] === 'function'
+          ? (...args) => {
+              mainConsole[prop](...args);
+              return rendererConsole[prop](...args);
+            }
+          : (...args) => rendererConsole[prop](...args);
+    });
+  delete global.console;
+  global.console = mergedConsole;
+};
+patchConsole();

@@ -12,7 +12,7 @@ export type GlobalConfig = {
   watch: boolean,
   watchAll: boolean,
 };
-export type ProjectConfig = {};
+export type ProjectConfig = {name: string};
 export type Resolver = {};
 export type RawModuleMap = {};
 
@@ -25,6 +25,7 @@ export type Context = {
 export type Test = {
   context: Context,
   path: string,
+  config: ProjectConfig,
 };
 
 export type Watcher = any;

@@ -20,8 +20,10 @@ module.exports = {
   displayName: '  fiddle',
   rootDir: p('./fiddle'),
   testPathIgnorePatterns: [
-    'tests/renderer/state-spec.ts'
+    'tests/renderer/state-spec.ts',
+    'tests/renderer/app-spec.tsx',
   ],
   runner: p('packages/electron'),
   testEnvironment: p('packages/electron/environment'),
+  testRunner: 'jest-circus/runner',
 };

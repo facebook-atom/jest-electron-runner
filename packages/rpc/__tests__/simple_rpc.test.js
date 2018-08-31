@@ -18,6 +18,8 @@ afterEach(() => {
   processes = [];
 });
 
+// to regenerate run:
+// node build/cli.js --RPCProcessPath='./RPCProcess.js' __fixtures__/simple_rpc/SimpleRPC.js
 test('can run remote commands', async () => {
   const childProcessPath = path.resolve(
     __dirname,
@@ -40,4 +42,5 @@ test('can run remote commands', async () => {
   await expect(simpleRPCProcess.remote.thisWillFail()).rejects.toThrowError(
     /hi!/,
   );
+  expect(await simpleRPCProcess.remote.multipleArgs(1, 'a')).toEqual([1, 'a']);
 });

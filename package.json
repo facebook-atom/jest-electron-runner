@@ -15,10 +15,13 @@
   "homepage": "https://github.com/facebook-atom/jest-electron-runner#readme",
   "devDependencies": {
     "babel-cli": "6.26.0",
+    "babel-eslint": "^9.0.0",
     "babel-plugin-transform-class-properties": "^6.24.1",
     "babel-plugin-transform-es2015-modules-commonjs": "6.26.0",
     "babel-plugin-transform-object-rest-spread": "^6.26.0",
     "babel-preset-flow": "6.23.0",
+    "eslint": "^5.4.0",
+    "eslint-plugin-jest": "^21.22.0",
     "flow-bin": "^0.79.1",
     "flow-remove-types": "^1.2.3",
     "jest": "^23.5.0",
@@ -36,5 +39,6 @@
     "build-watch": "flow-node ./scripts/build && flow-node ./scripts/build-watch",
     "clean": "rm -rf ./packages/*/build",
     "test": "jest"
-  }
+  },
+  "dependencies": {}
 }

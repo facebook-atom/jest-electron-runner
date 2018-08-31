@@ -1,0 +1,4 @@
+**/coverage/**
+**/node_modules/**
+flow-typed/**
+packages/*/build/**

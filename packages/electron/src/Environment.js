@@ -10,7 +10,7 @@
 
 /* eslint-disable nuclide-internal/no-commonjs */
 
-import type {ProjectConfig} from '../../../types';
+import type {ProjectConfig} from '@jest-runner/core/types';
 
 import mock from 'jest-mock';
 

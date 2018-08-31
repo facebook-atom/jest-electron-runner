@@ -3,34 +3,11 @@
 
 <head>
     <meta charset="UTF-8">
-    <meta http-equiv="Content-Security-Policy" content="default-src *; img-src blob: data: *; script-src 'self' 'unsafe-eval'; style-src 'self' 'unsafe-inline'; media-src blob: data: mediastream: *;">
-
+    <meta http-equiv="Content-Security-Policy" content="*" />
     <title>Hi!</title>
 </head>
 
 <body>
-    <script>
-        const { Console } = require('console')
-        const patchConsole = () => {
-            const mainConsole = new Console(process.stdout, process.stderr);
-            const rendererConsole = global.console;
-            const mergedConsole = {};
-            Object.getOwnPropertyNames(rendererConsole)
-                .filter(prop => typeof rendererConsole[prop] === 'function')
-                .forEach(prop => {
-                    mergedConsole[prop] =
-                        typeof mainConsole[prop] === 'function'
-                            ? (...args) => {
-                                mainConsole[prop](...args);
-                                return rendererConsole[prop](...args);
-                            }
-                            : (...args) => rendererConsole[prop](...args);
-                });
-            delete global.console;
-            global.console = mergedConsole;
-        };
-        patchConsole();
-    </script>
     <script src="./browser_window_injected_code.js"></script>
 </body>
 

@@ -6,14 +6,17 @@ module.exports = {
     node: true,
   },
   extends: 'eslint:recommended',
-  parserOptions: {
-    ecmaVersion: 2018,
-    sourceType: 'module',
+  parser: 'babel-eslint',
+  // parserOptions: {
+  //   ecmaVersion: 2018,
+  //   sourceType: 'module',
+  // },
+  plugins: ['jest'],
+  env: {
+    'jest/globals': true,
+    node: true,
+    browser: true,
+    es6: true,
   },
-  rules: {
-    indent: ['error', 4],
-    'linebreak-style': ['error', 'unix'],
-    quotes: ['error', 'single'],
-    semi: ['error', 'always'],
-  },
+  rules: {},
 };

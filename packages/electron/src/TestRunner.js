@@ -9,21 +9,26 @@
  */
 
 import type {IPCServer} from '../../core/src/ipc-server';
-import type {GlobalConfig, Test, TestResult, Watcher} from '../../../types';
+import type {
+  GlobalConfig,
+  Test,
+  TestResult,
+  Watcher,
+} from '@jest-runner/core/types';
 import type {ServerID} from '../../core/src/utils';
 
 import {startServer} from '@jest-runner/core/ipc-server';
 import {makeUniqServerId, invariant} from '@jest-runner/core/utils';
-import ElectronProcess from './ElectronProcess';
 import throat from 'throat';
+import JestWorkerRpcProcess from './rpc/JestWorkerRPCProcess.generated';
+import path from 'path';
+import {spawn} from 'child_process';
 
 // Share ipc server and farm between multiple runs, so we don't restart
-// the whole thing in watch mode every time. (it steals window focus when
-// atom launches)
-let ipcServerPromise;
-let serverID;
-let electronProcess;
-let cleanupRegistered = false;
+// the whole thing in watch mode every time.
+let jestWorkerRPCProcess;
+
+const ELECTRON_BIN = path.resolve(require.resolve('electron'), '..', 'cli.js');
 
 const once = fn => {
   let hasBeenCalled = false;
@@ -42,12 +47,6 @@ export default class TestRunner {
 
   constructor(globalConfig: GlobalConfig) {
     this._globalConfig = globalConfig;
-    serverID = serverID || (serverID = makeUniqServerId());
-    this._serverID = serverID;
-    ipcServerPromise ||
-      (ipcServerPromise = startServer({
-        serverID: this._serverID,
-      }));
   }
 
   async runTests(
@@ -62,21 +61,34 @@ export default class TestRunner {
     const concurrency = isWatch
       ? 1
       : Math.min(tests.length, this._globalConfig.maxWorkers);
-    const ipcServer = await ipcServerPromise;
 
-    if (!electronProcess) {
-      electronProcess = new ElectronProcess({
-        serverID: this._serverID,
-        ipcServer: await ipcServer,
-        globalConfig: this._globalConfig,
-        concurrency,
+    if (!jestWorkerRPCProcess) {
+      jestWorkerRPCProcess = new JestWorkerRpcProcess({
+        spawn: ({serverID}) => {
+          const injectedCodePath = require.resolve(
+            './electron_process_injected_code.js',
+          );
+          return spawn(ELECTRON_BIN, [injectedCodePath], {
+            stdio: [
+              'inherit',
+              // redirect child process' stdout to parent process stderr, so it
+              // doesn't break any tools that depend on stdout (like the ones
+              // that consume a generated JSON report from jest's stdout)
+              process.stderr,
+              'inherit',
+            ],
+            env: {
+              ...process.env,
+              JEST_SERVER_ID: serverID,
+            },
+            detached: true,
+          });
+        },
       });
-      await electronProcess.start();
     }
 
     const cleanup = once(() => {
-      electronProcess.stop();
-      ipcServer.stop();
+      jestWorkerRPCProcess.stop();
     });
 
     process.on('SIGINT', () => {
@@ -91,12 +103,27 @@ export default class TestRunner {
       process.exit(1);
     });
 
+    await jestWorkerRPCProcess.start();
     await Promise.all(
       tests.map(
         throat(concurrency, test => {
-          return electronProcess
-            .runTest(test, onStart)
-            .then(testResult => onResult(test, testResult))
+          onStart(test);
+          const rawModuleMap = test.context.moduleMap.getRawModuleMap();
+          const config = test.context.config;
+          const globalConfig = this._globalConfig;
+          return jestWorkerRPCProcess.remote
+            .runTest({
+              rawModuleMap,
+              config,
+              globalConfig,
+              path: test.path,
+            })
+            .then(testResult => {
+              testResult.testExecError != null
+                ? // $FlowFixMe jest expects it to be rejected with an object
+                  onFailure(test, testResult.testExecError)
+                : onResult(test, testResult);
+            })
             .catch(error => onFailure(test, error));
         }),
       ),
