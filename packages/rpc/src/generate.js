@@ -41,6 +41,8 @@ export const prepareFiles = async ({
   );
   return Promise.all(
     files.map(async file => {
+      // eslint-disable-next-line no-console
+      console.log(`generating: ${file}`);
       if (!file.match(/\.js$/)) {
         throw new Error(
           `RPC definitions must be '.js' files. filename: ${file}`,

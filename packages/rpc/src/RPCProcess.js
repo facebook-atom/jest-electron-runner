@@ -80,7 +80,10 @@ export default class RPCProcess<Methods> {
   stop() {
     this.server && this.server.stop();
     if (this._subprocess) {
-      process.kill(-this._subprocess.pid);
+      try {
+        process.kill(-this._subprocess.pid);
+        // eslint-disable-next-line no-empty
+      } catch (e) {}
       this._subprocess.kill();
     }
     delete this.server;
