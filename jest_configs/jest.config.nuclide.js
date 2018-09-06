@@ -9,7 +9,7 @@
 'use strict';
 
 const path = require('path');
-const p = relative => path.resolve(__dirname, relative);
+const p = relative => path.resolve(path.join(__dirname, '..'), relative);
 
 module.exports = {
   displayName: ' nuclide',
@@ -19,5 +19,6 @@ module.exports = {
   runner: p('packages/nuclide-e2e'),
   //   testRunner: require.resolve('jest-circus/runner'),
   //   testEnvironment: p('packages/electron/environment'),
+  setupFiles: ['<rootDir>/jest_configs/nuclide_setup.js'],
   testPathIgnorePatterns: ['/node_modules/'],
 };

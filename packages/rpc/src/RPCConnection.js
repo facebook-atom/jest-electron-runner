@@ -8,7 +8,7 @@
  */
 
 import {validateIPCID} from './utils';
-import ipc from 'node-ipc';
+import {IPC} from 'node-ipc';
 import {INITIALIZE_MESSAGE, JSONRPC_EVENT_NAME} from './constants';
 import {
   parseRequest,
@@ -20,35 +20,37 @@ export default class RPCConnection<
   Methods: {[string]: (...Args: any) => Promise<any>},
 > {
   methods: Methods;
+  _ipc: IPC;
 
   constructor(methods: Methods) {
     this.methods = methods;
+    this._ipc = new IPC();
   }
 
   async connect(serverID?: string) {
     return new Promise(resolve => {
       serverID || (serverID = validateIPCID(process.env.JEST_SERVER_ID));
-      ipc.config.id = serverID;
-      ipc.config.silent = true;
-      ipc.config.retry = 1500;
+      this._ipc.config.id = serverID;
+      this._ipc.config.silent = true;
+      this._ipc.config.retry = 1500;
 
-      ipc.connectTo(serverID, () => {
-        ipc.of[serverID].on('connect', () => {
-          ipc.of[serverID].emit(INITIALIZE_MESSAGE);
+      this._ipc.connectTo(serverID, () => {
+        this._ipc.of[serverID].on('connect', () => {
+          this._ipc.of[serverID].emit(INITIALIZE_MESSAGE);
         });
 
-        ipc.of[serverID].on(JSONRPC_EVENT_NAME, data => {
+        this._ipc.of[serverID].on(JSONRPC_EVENT_NAME, data => {
           const {method, params, id} = parseRequest(data);
           this.methods[method]
             .apply(null, params)
             .then(result => {
-              ipc.of[serverID].emit(
+              this._ipc.of[serverID].emit(
                 JSONRPC_EVENT_NAME,
                 serializeResultResponse(result, id),
               );
             })
             .catch(error => {
-              ipc.of[serverID].emit(
+              this._ipc.of[serverID].emit(
                 JSONRPC_EVENT_NAME,
                 serializeErrorResponse(error, id),
               );

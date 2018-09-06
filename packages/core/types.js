@@ -8,11 +8,18 @@
  */
 
 export type GlobalConfig = {
+  expand: boolean,
   maxWorkers: number,
+  verbose: boolean,
   watch: boolean,
   watchAll: boolean,
 };
-export type ProjectConfig = {name: string};
+export type ProjectConfig = {
+  name: string,
+  rootDir: string,
+  setupFiles: Array<string>,
+  setupTestFrameworkScriptFile: ?string,
+};
 export type Resolver = {};
 export type RawModuleMap = {};
 

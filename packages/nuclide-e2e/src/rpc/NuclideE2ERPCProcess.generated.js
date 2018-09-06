@@ -3,7 +3,7 @@
  * THIS IS A GENERATED FILE. DO NOT MODIFY IT MANUALLY!
  * ****************************************************
  * @flow
- * @generated 151ec46721ad742e15fa5af1641152ea
+ * @generated c98e0eea63c67fda1d3edf6cf1c6610e
  */
 
 import typeof Methods from './NuclideE2ERPC.js';
@@ -13,6 +13,7 @@ class NuclideE2ERPCProcess extends RPCProcess<Methods> {
   initializeRemote(): Methods {
     return {
       runTest: (this.jsonRPCCall.bind(this, 'runTest'): any),
+      shutDown: (this.jsonRPCCall.bind(this, 'shutDown'): any),
     };
   }
 }

@@ -14,7 +14,7 @@ import {spawn} from 'child_process';
 import {makeUniqServerId} from './utils';
 import path from 'path';
 import {INITIALIZE_MESSAGE, JSONRPC_EVENT_NAME} from './constants';
-import ipc from 'node-ipc';
+import {IPC} from 'node-ipc';
 import {serializeRequest, parseResponse} from './jsonrpc';
 
 type SpawnFn = ({serverID: ServerID}) => child_process$ChildProcess;
@@ -30,6 +30,7 @@ type ConstructorOptions =
   | {|spawnNode: SpawnNode|};
 
 export default class RPCProcess<Methods> {
+  _ipc: IPC;
   server: Object;
   serverID: ServerID;
   isAlive: boolean;
@@ -42,6 +43,7 @@ export default class RPCProcess<Methods> {
   constructor(options: ConstructorOptions) {
     this.serverID = makeUniqServerId();
     this.isAlive = false;
+    this._ipc = new IPC();
 
     this._spawn = options.spawnNode
       ? makeSpawnNodeFn(this.serverID, options.spawnNode)
@@ -55,24 +57,24 @@ export default class RPCProcess<Methods> {
   }
 
   async start() {
-    ipc.config.id = this.serverID;
-    ipc.config.retry = 1500;
-    ipc.config.silent = true;
+    this._ipc.config.id = this.serverID;
+    this._ipc.config.retry = 1500;
+    this._ipc.config.silent = true;
 
     this._subprocess = this._spawn({serverID: this.serverID});
     const socket = await new Promise(async resolve => {
-      ipc.serve(() => {
-        ipc.server.on(INITIALIZE_MESSAGE, (message, socket) => {
-          this.server = ipc.server;
+      this._ipc.serve(() => {
+        this._ipc.server.on(INITIALIZE_MESSAGE, (message, socket) => {
+          this.server = this._ipc.server;
           this.isAlive = true;
           resolve(socket);
         });
 
-        ipc.server.on(JSONRPC_EVENT_NAME, json => {
+        this._ipc.server.on(JSONRPC_EVENT_NAME, json => {
           this.handleJsonRPCResponse(json);
         });
       });
-      ipc.server.start();
+      this._ipc.server.start();
     });
     this._socket = socket;
   }
@@ -84,7 +86,7 @@ export default class RPCProcess<Methods> {
         process.kill(-this._subprocess.pid);
         // eslint-disable-next-line no-empty
       } catch (e) {}
-      this._subprocess.kill();
+      this._subprocess.kill('SIGTERM');
     }
     delete this.server;
     this.isAlive = false;
@@ -112,10 +114,10 @@ export default class RPCProcess<Methods> {
     const response = parseResponse(json);
     const {id, result, error} = response;
 
-    if (result) {
-      this._pendingRequests[id].resolve(result);
-    } else {
+    if (error) {
       this._pendingRequests[id].reject(error);
+    } else {
+      this._pendingRequests[id].resolve(result);
     }
   }
 
