@@ -5,12 +5,13 @@
  * LICENSE file in the root directory of this source tree.
  *
  * @flow
+ * @format
  */
 
-module.exports = {
-  projects: [
-    './jest_configs/jest.config.electron.js',
-    './jest_configs/jest.config.node.js',
-    './jest_configs/jest.config.fiddle.js',
-  ],
+import type {ProjectConfig, GlobalConfig} from '@jest-runner/core/types';
+
+export type IPCTestData = {
+  config: ProjectConfig,
+  globalConfig: GlobalConfig,
+  path: string,
 };

@@ -4,13 +4,8 @@
  * This source code is licensed under the MIT license found in the
  * LICENSE file in the root directory of this source tree.
  *
- * @flow
+ * @flow strict-local
+ * @format
  */
 
-module.exports = {
-  projects: [
-    './jest_configs/jest.config.electron.js',
-    './jest_configs/jest.config.node.js',
-    './jest_configs/jest.config.fiddle.js',
-  ],
-};
+module.exports = require('./build/TestRunner.js').default;

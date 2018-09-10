@@ -9,10 +9,10 @@
 'use strict';
 
 // $FlowFixMe
-const fiddleConfig = require('./fiddle/jest.json');
+const fiddleConfig = require('../fiddle/jest.json');
 
 const path = require('path');
-const p = relative => path.resolve(__dirname, relative);
+const p = relative => path.resolve(__dirname, '..', relative);
 
 module.exports = {
   ...fiddleConfig,

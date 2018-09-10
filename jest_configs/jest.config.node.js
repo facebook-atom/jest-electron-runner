@@ -9,7 +9,7 @@
 'use strict';
 
 const path = require('path');
-const p = relative => path.resolve(__dirname, relative);
+const p = relative => path.resolve(__dirname, '..', relative);
 
 module.exports = {
   displayName: '    node',

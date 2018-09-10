@@ -9,15 +9,16 @@
 'use strict';
 
 const path = require('path');
-const p = relative => path.resolve(__dirname, relative);
+const p = relative => path.resolve(path.join(__dirname, '..'), relative);
 
 module.exports = {
-  displayName: 'electron',
+  displayName: ' nuclide',
   rootDir: p(''),
   roots: [p('')],
-  testMatch: ['**/__electron_tests__/**/*.js?(x)'],
-  runner: p('packages/electron'),
-  testRunner: require.resolve('jest-circus/runner'),
-  testEnvironment: p('packages/electron/environment'),
+  testMatch: ['**/__nuclide_tests__/**/*.js?(x)'],
+  runner: p('packages/nuclide-e2e'),
+  //   testRunner: require.resolve('jest-circus/runner'),
+  //   testEnvironment: p('packages/electron/environment'),
+  setupFiles: ['<rootDir>/jest_configs/nuclide_setup.js'],
   testPathIgnorePatterns: ['/node_modules/'],
 };
