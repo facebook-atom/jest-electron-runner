@@ -49,17 +49,7 @@ const spawnAtomProcess = ({atomHome, atomExecutable, onOutput}, {serverID}) => {
     Make sure you have it specified in ${NUCLIDE_E2E_CONFIG_NAME}`);
   }
   const spawned = spawn(atomExecutable, {
-    stdio: [
-      'pipe',
-      'pipe',
-      'pipe',
-      // 'inherit',
-      // // redirect child process' stdout to parent process stderr, so it
-      // // doesn't break any tools that depend on stdout (like the ones
-      // // that consume a generated JSON report from jest's stdout)
-      // process.stderr,
-      // 'inherit',
-    ],
+    stdio: ['pipe', 'pipe', 'pipe'],
     env: {
       ...process.env,
       JEST_SERVER_ID: serverID,
