@@ -69,4 +69,8 @@ export type TestResult = {
   displayName: string,
   leaks: boolean,
   testExecError: ?string,
+
+  // Not in Jest core. This property only added by some packages
+  // in this repo.
+  runID: ?string,
 };

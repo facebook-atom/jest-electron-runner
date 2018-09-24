@@ -28,8 +28,8 @@ const INJECTED_PACKAGE_PATH = path.resolve(
   './nuclide-e2e-injected-package',
 );
 
-const makeTmpAtomHome = () => {
-  const dirPath = path.resolve(os.tmpdir(), `.atom-${uuidv4()}`);
+const makeTmpAtomHome = runID => {
+  const dirPath = path.resolve(os.tmpdir(), `.atom-${runID}`);
   const packagesPath = path.join(dirPath, 'packages');
   fs.mkdirpSync(dirPath);
   fs.mkdirpSync(packagesPath);
@@ -42,7 +42,10 @@ const makeTmpAtomHome = () => {
 
 let thingsToCleanUp = [];
 
-const spawnAtomProcess = ({atomHome, atomExecutable, onOutput}, {serverID}) => {
+const spawnAtomProcess = (
+  {atomHome, atomExecutable, onOutput, runID},
+  {serverID},
+) => {
   if (!atomExecutable || !fs.existsSync(atomExecutable)) {
     throw new Error(`
     can't find atomExecutable: "${JSON.stringify(atomExecutable)}".
@@ -53,6 +56,7 @@ const spawnAtomProcess = ({atomHome, atomExecutable, onOutput}, {serverID}) => {
     env: {
       ...process.env,
       JEST_SERVER_ID: serverID,
+      JEST_RUN_ID: runID,
       ATOM_HOME: atomHome,
     },
     detached: true,
@@ -147,7 +151,8 @@ export default class TestRunner {
           const {atomExecutable, consoleFilter} = findConfig(config.rootDir);
           try {
             onStart(test);
-            const atomHome = makeTmpAtomHome();
+            const runID = uuidv4();
+            const atomHome = makeTmpAtomHome(runID);
             let processOutput = [];
             const onOutput = (pipe: string, data: string) => {
               const message = data.toString ? data.toString() : data;
@@ -162,6 +167,7 @@ export default class TestRunner {
                 atomHome,
                 atomExecutable,
                 onOutput,
+                runID,
               }),
             });
             for (const setupFile of config.setupFiles) {
@@ -194,6 +200,7 @@ export default class TestRunner {
                   ];
                 }
                 testResult.console = consoleFilter(testResult.console);
+                testResult.runID = runID;
                 testResult.testExecError != null
                   ? // $FlowFixMe jest expects it to be rejected with an object
                     onFailure(test, testResult.testExecError)
