@@ -27,9 +27,9 @@ export default class RPCConnection<
     this._ipc = new IPC();
   }
 
-  async connect(serverID?: string) {
+  async connect(_serverID?: string) {
     return new Promise(resolve => {
-      serverID || (serverID = validateIPCID(process.env.JEST_SERVER_ID));
+      const serverID = _serverID || validateIPCID(process.env.JEST_SERVER_ID);
       this._ipc.config.id = serverID;
       this._ipc.config.silent = true;
       this._ipc.config.retry = 1500;
