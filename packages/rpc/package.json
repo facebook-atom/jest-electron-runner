@@ -1,6 +1,6 @@
 {
     "name": "@jest-runner/rpc",
-    "version": "0.0.8",
+    "version": "0.0.9",
     "description": "RPC that powers Jest runners",
     "author": "Aaron Abramov",
     "license": "MIT",
