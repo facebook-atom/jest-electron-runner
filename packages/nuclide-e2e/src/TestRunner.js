@@ -82,6 +82,7 @@ type ConsoleOutput = ?Array<{message: string, origin: string, output: string}>;
 type NuclideE2EConfig = {|
   atomExecutable: string,
   consoleFilter: ConsoleOutput => ConsoleOutput,
+  testTeardown?: ({runID: string, atomHome: string}) => void,
 |};
 
 const NUCLIDE_E2E_CONFIG_NAME = 'jest.nuclide-e2e-runner-config.js';
@@ -148,7 +149,9 @@ export default class TestRunner {
         throat(concurrency, async test => {
           const config = test.context.config;
           const globalConfig = this._globalConfig;
-          const {atomExecutable, consoleFilter} = findConfig(config.rootDir);
+          const {atomExecutable, consoleFilter, testTeardown} = findConfig(
+            config.rootDir,
+          );
           try {
             onStart(test);
             const runID = uuidv4();
@@ -181,6 +184,7 @@ export default class TestRunner {
             const localCleanup = once(() => {
               nuclideE2ERPCProcess.remote.shutDown();
               nuclideE2ERPCProcess.stop();
+              testTeardown && testTeardown({runID, atomHome});
             });
             // Add to global cleanup in case the process crashes or something. We still want to kill all
             // subprocesses.

@@ -83,11 +83,11 @@ export default class RPCProcess<Methods> {
     this.server && this.server.stop();
     if (this._subprocess) {
       try {
-        process.kill(-this._subprocess.pid);
+        process.kill(-this._subprocess.pid, 'SIGKILL');
         // eslint-disable-next-line no-empty
       } catch (e) {}
-      this._subprocess.kill('SIGTERM');
     }
+    this._subprocess.kill('SIGKILL');
     delete this.server;
     this.isAlive = false;
   }
