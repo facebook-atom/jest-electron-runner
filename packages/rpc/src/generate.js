@@ -209,6 +209,6 @@ const relativePath = (from, to) => {
 };
 
 const prettify = async (generatedFile, code) => {
-  const config = await prettier.resolveConfig(generatedFile);
+  const config: any = await prettier.resolveConfig(generatedFile);
   return prettier.format(code, config);
 };

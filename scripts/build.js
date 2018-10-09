@@ -40,6 +40,7 @@ const transformOptions = JSON.parse(
   fs.readFileSync(path.resolve(__dirname, '..', '.babelrc'), 'utf8'),
 );
 transformOptions.babelrc = false;
+// $FlowFixMe
 const prettierConfig = prettier.resolveConfig.sync(__filename);
 prettierConfig.trailingComma = 'none';
 prettierConfig.parser = 'babylon';
@@ -132,6 +133,7 @@ function buildFile(file, silent) {
     }
 
     const transformed = babel.transformFileSync(file, options).code;
+    // $FlowFixMe
     const prettyCode = prettier.format(transformed, prettierConfig);
     fs.writeFileSync(destPath, prettyCode);
     silent ||
