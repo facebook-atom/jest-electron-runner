@@ -1,13 +1,13 @@
 {
     "name": "@jest-runner/rpc",
-    "version": "0.0.11",
+    "version": "0.0.12",
     "description": "RPC that powers Jest runners",
     "author": "Aaron Abramov",
     "license": "MIT",
     "homepage": "https://github.com/facebook-atom/jest-electron-runner",
     "repository": "https://github.com/facebook-atom/jest-electron-runner",
     "dependencies": {
-        "@jest-runner/core": "^0.0.11",
+        "@jest-runner/core": "^0.0.12",
         "glob": "^7.1.3",
         "jscodeshift": "^0.5.1",
         "prettier": "^1.14.2",
