@@ -29,22 +29,27 @@ const INJECTED_PACKAGE_PATH = path.resolve(
   './nuclide-e2e-injected-package',
 );
 
-const makeTmpAtomHome = runID => {
-  const dirPath = path.resolve(os.tmpdir(), `.atom-${runID}`);
-  const packagesPath = path.join(dirPath, 'packages');
-  fs.mkdirpSync(dirPath);
+const makeTmpDirs = runID => {
+  const tmpDir = path.resolve(os.tmpdir(), `.atom-${runID}`);
+  // temp ~ that can be set to process.env.HOME to make sure
+  // e2e tests don't write anything in the home dir of the user
+  // that's running the test.
+  const userHome = path.join(tmpDir, 'USER_HOME');
+  const atomHome = path.join(tmpDir, 'ATOM_HOME');
+  const packagesPath = path.join(atomHome, 'packages');
   fs.mkdirpSync(packagesPath);
+  fs.mkdirpSync(userHome);
   fs.ensureSymlinkSync(
     INJECTED_PACKAGE_PATH,
     path.join(packagesPath, path.basename(INJECTED_PACKAGE_PATH)),
   );
-  return dirPath;
+  return {atomHome, userHome};
 };
 
 let thingsToCleanUp = [];
 
 const spawnAtomProcess = (
-  {atomHome, atomExecutable, onOutput, runID},
+  {atomHome, atomExecutable, onOutput, runID, userHome},
   {serverID},
 ) => {
   if (!atomExecutable || !fs.existsSync(atomExecutable)) {
@@ -56,9 +61,10 @@ const spawnAtomProcess = (
     stdio: ['pipe', 'pipe', 'pipe'],
     env: {
       ...process.env,
-      JEST_SERVER_ID: serverID,
-      JEST_RUN_ID: runID,
       ATOM_HOME: atomHome,
+      HOME: userHome,
+      JEST_RUN_ID: runID,
+      JEST_SERVER_ID: serverID,
     },
     detached: true,
   });
@@ -156,7 +162,7 @@ export default class TestRunner {
           try {
             onStart(test);
             const runID = uuidv4();
-            const atomHome = makeTmpAtomHome(runID);
+            const {atomHome, userHome} = makeTmpDirs(runID);
             let processOutput = [];
             const onOutput = (pipe: string, data: string) => {
               const message = data.toString ? data.toString() : data;
@@ -172,6 +178,7 @@ export default class TestRunner {
                 atomExecutable,
                 onOutput,
                 runID,
+                userHome,
               }),
             });
             const directives = Docblock.fromFile(test.path).getDirectives();
