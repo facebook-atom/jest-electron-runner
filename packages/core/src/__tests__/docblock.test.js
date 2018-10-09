@@ -7,8 +7,9 @@
  * @flow
  */
 
-const os = require('os');
 const Docblock = require('../docblock');
+const os = require('os');
+const path = require('path');
 
 it('extracts valid docblock with line comment', () => {
   const code =
@@ -297,5 +298,36 @@ test('tries to group directives', () => {
   const docblock = new Docblock(code);
   docblock.setDirective('providesModule', 'lasagna');
 
+  expect(docblock.printFileContent()).toMatchSnapshot();
+});
+
+// not supported yet
+test.skip('multiple directives', () => {
+  const code = `/**
+   * Copyright (c) 2015-present, Facebook, Inc.
+   * All rights reserved.
+   *
+   * @flow
+   * @gk-enable abc
+   * @gk-enable cde
+   * @gk-disable ttt
+   * @gk-disable sss
+   *
+   * Some more comments
+   * blah blah blah...
+   * ....
+   */
+  `.trim();
+  const docblock = new Docblock(code);
+  expect(docblock.getDirectives()).toMatchSnapshot();
+  // $FlowFixMe
+  docblock.setDirective('test', ['1', '2']);
+  expect(docblock.printFileContent()).toBe('lol');
+});
+
+test('read from file path', () => {
+  const filePath = path.resolve(__dirname, '../__fixtures__/docblock_file.js');
+  const docblock = Docblock.fromFile(filePath);
+  expect(docblock.getDirectives()).toMatchSnapshot();
   expect(docblock.printFileContent()).toMatchSnapshot();
 });

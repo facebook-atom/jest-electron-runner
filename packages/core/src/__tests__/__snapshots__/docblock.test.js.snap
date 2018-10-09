@@ -1,5 +1,46 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
+exports[`multiple directives 1`] = `
+Object {
+  "flow": "",
+  "gk-disable": Array [
+    "ttt",
+    "sss",
+  ],
+  "gk-enable": Array [
+    "abc",
+    "cde",
+  ],
+}
+`;
+
+exports[`read from file path 1`] = `
+Object {
+  "flow": "",
+  "other-stuff": "racoons",
+  "stuff": Array [
+    "abc",
+    "cde",
+  ],
+}
+`;
+
+exports[`read from file path 2`] = `
+"/**
+ * Copyright (c) 2014-present, Facebook, Inc. All rights reserved.
+ *
+ * This source code is licensed under the MIT license found in the
+ * LICENSE file in the root directory of this source tree.
+ *
+ * @flow
+ * @stuff abc
+ * @stuff cde
+ * @other-stuff racoons
+ */
+
+"
+`;
+
 exports[`retain newlines in the middle but not trailing/leading 1`] = `
 "/**
  * Copyright (c) 2015-present, Facebook, Inc.

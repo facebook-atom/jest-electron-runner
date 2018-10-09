@@ -8,7 +8,7 @@
  */
 
 import crypto from 'crypto';
-import Docblock from './docblock';
+import Docblock from '@jest-runner/core/docblock';
 import fs from 'fs';
 import globLib from 'glob';
 import j from 'jscodeshift';

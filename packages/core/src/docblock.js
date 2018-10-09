@@ -31,6 +31,8 @@
  *    * /
  */
 
+import fs from 'fs';
+
 type DocblockNode =
   | {|
       type: 'comment',
@@ -48,6 +50,11 @@ class Docblock {
   _restOfTheFile: string;
   _originalDocblock: string;
   _docblock: string;
+
+  static fromFile(filePath: string) {
+    const content = fs.readFileSync(filePath, 'utf8');
+    return new Docblock(content);
+  }
 
   constructor(code: string) {
     this._code = code;
@@ -139,7 +146,16 @@ class Docblock {
       .filter(node => node.type === 'directive')
       .reduce((directives, node) => {
         // $FlowFixMe filter
-        directives[node.name] = node.value;
+        const nodeName = node.name;
+        // If any of the directives repeat, we'll make an array of all
+        // values that have the same key (directive)
+        if (directives.hasOwnProperty(nodeName)) {
+          Array.isArray(directives[nodeName])
+            ? directives[nodeName].push(node.value)
+            : (directives[nodeName] = [directives[nodeName], node.value]);
+        } else {
+          directives[nodeName] = node.value;
+        }
         return directives;
       }, {});
   }

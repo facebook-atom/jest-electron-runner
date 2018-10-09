@@ -7,6 +7,7 @@
     "homepage": "https://github.com/facebook-atom/jest-electron-runner",
     "repository": "https://github.com/facebook-atom/jest-electron-runner",
     "dependencies": {
+        "@jest-runner/core": "^0.0.9",
         "glob": "^7.1.3",
         "jscodeshift": "^0.5.1",
         "prettier": "^1.14.2",

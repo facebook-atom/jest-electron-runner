@@ -15,6 +15,7 @@ import type {
 } from '@jest-runner/core/types';
 
 import {buildFailureTestResult} from '@jest-runner/core/utils';
+import Docblock from '@jest-runner/core/docblock';
 import {spawn} from 'child_process';
 import fs from 'fs-extra';
 import NuclideE2ERPCProcess from './rpc/NuclideE2ERPCProcess.generated';
@@ -173,11 +174,13 @@ export default class TestRunner {
                 runID,
               }),
             });
+            const directives = Docblock.fromFile(test.path).getDirectives();
             for (const setupFile of config.setupFiles) {
               // $FlowFixMe dynamic require
               const setup = require(setupFile); // if it's a function call it and pass arguments. This is different
               // from how Jest works, but right now there's no other workaround to it
-              typeof setup === 'function' && (await setup({atomHome}));
+              typeof setup === 'function' &&
+                (await setup({atomHome, directives}));
             }
             await nuclideE2ERPCProcess.start();
 
