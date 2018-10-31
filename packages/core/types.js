@@ -37,7 +37,7 @@ export type Test = {
 
 export type Watcher = any;
 
-export type TestResult = {
+export type TestResult = {|
   console: ?Array<any>,
   failureMessage: ?string,
   numFailingTests: number,
@@ -69,8 +69,4 @@ export type TestResult = {
   displayName: string,
   leaks: boolean,
   testExecError: ?string,
-
-  // Not in Jest core. This property only added by some packages
-  // in this repo.
-  runID?: string,
-};
+|};

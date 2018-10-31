@@ -8,10 +8,23 @@
  * @format
  */
 
-import type {ProjectConfig, GlobalConfig} from '@jest-runner/core/types';
+import type {
+  ProjectConfig,
+  GlobalConfig,
+  TestResult as TestResultBase,
+} from '@jest-runner/core/types';
 
 export type IPCTestData = {
   config: ProjectConfig,
   globalConfig: GlobalConfig,
   path: string,
 };
+
+export type TestResult = {|
+  ...TestResultBase,
+
+  // Not in Jest core. This property only added by some packages
+  // in this repo.
+  runID?: string,
+  retriedResults?: Array<TestResult>,
+|};

@@ -10,9 +10,10 @@
 import type {
   GlobalConfig,
   Test,
-  TestResult,
   Watcher,
+  TestResult as TestResultBase,
 } from '@jest-runner/core/types';
+import type {TestResult} from '../types';
 
 import {buildFailureTestResult} from '@jest-runner/core/utils';
 import Docblock from '@jest-runner/core/docblock';
@@ -90,6 +91,7 @@ type NuclideE2EConfig = {|
   atomExecutable: string,
   consoleFilter: ConsoleOutput => ConsoleOutput,
   testTeardown?: ({runID: string, atomHome: string}) => void,
+  retries?: number,
 |};
 
 const NUCLIDE_E2E_CONFIG_NAME = 'jest.nuclide-e2e-runner-config.js';
@@ -156,78 +158,49 @@ export default class TestRunner {
         throat(concurrency, async test => {
           const config = test.context.config;
           const globalConfig = this._globalConfig;
-          const {atomExecutable, consoleFilter, testTeardown} = findConfig(
-            config.rootDir,
-          );
+          const {
+            atomExecutable,
+            consoleFilter,
+            testTeardown,
+            retries,
+          } = findConfig(config.rootDir);
+          let retriesLeft = retries || 1;
+          let allRunResults = [];
+
           try {
             onStart(test);
-            const runID = uuidv4();
-            const {atomHome, userHome} = makeTmpDirs(runID);
-            let processOutput = [];
-            const onOutput = (pipe: string, data: string) => {
-              const message = data.toString ? data.toString() : data;
-              processOutput.push({
-                message,
-                origin: `Atom process ${pipe}`,
-                type: 'log',
-              });
-            };
-            const nuclideE2ERPCProcess = new NuclideE2ERPCProcess({
-              spawn: spawnAtomProcess.bind(null, {
-                atomHome,
-                atomExecutable,
-                onOutput,
-                runID,
-                userHome,
-              }),
-            });
-            const directives = Docblock.fromFile(test.path).getDirectives();
-            for (const setupFile of config.setupFiles) {
-              // $FlowFixMe dynamic require
-              const setup = require(setupFile); // if it's a function call it and pass arguments. This is different
-              // from how Jest works, but right now there's no other workaround to it
-              typeof setup === 'function' &&
-                (await setup({atomHome, directives}));
-            }
-            await nuclideE2ERPCProcess.start();
 
-            const localCleanup = once(() => {
-              nuclideE2ERPCProcess.remote.shutDown();
-              nuclideE2ERPCProcess.stop();
-              testTeardown && testTeardown({runID, atomHome});
-            });
-            // Add to global cleanup in case the process crashes or something. We still want to kill all
-            // subprocesses.
-            thingsToCleanUp.push(localCleanup);
-            const testResult = await nuclideE2ERPCProcess.remote
-              .runTest({
-                config,
+            while (retriesLeft) {
+              retriesLeft -= 1;
+              const runID = uuidv4();
+              const {processOutput, testResult} = await _runTest(test, {
+                keepProcessAlive,
                 globalConfig,
-                path: test.path,
-              })
-              .then(testResult => {
-                if (processOutput.length) {
-                  // Add messages from process output to test results
-                  testResult.console = [
-                    ...processOutput,
-                    ...(testResult.console || []),
-                  ];
-                }
-                testResult.console = consoleFilter(testResult.console);
-                testResult.runID = runID;
-                testResult.testExecError != null
-                  ? // $FlowFixMe jest expects it to be rejected with an object
-                    onFailure(test, testResult.testExecError)
-                  : onResult(test, testResult);
-              })
-              .catch(error => onFailure(test, error));
+                testTeardown,
+                atomExecutable,
+                runID,
+              });
 
-            // We'll reuse `expand` flag (not the best idea) to keep the nuclide process
-            // alive if we want to go back and debug something.
-            if (!keepProcessAlive) {
-              localCleanup();
+              const amendedTestResult: TestResult = amendTestResult({
+                testResult,
+                processOutput,
+                runID,
+                consoleFilter,
+              });
+
+              allRunResults.push(amendedTestResult);
+              if (!hasFailed(amendedTestResult)) {
+                break;
+              }
             }
-            return testResult;
+
+            const [lastResult, ...retriedResults] = allRunResults.reverse();
+
+            lastResult.retriedResults = retriedResults.reverse();
+            lastResult.testExecError != null
+              ? // $FlowFixMe jest expects it to be rejected with an object
+                onFailure(test, lastResult.testExecError)
+              : onResult(test, lastResult);
           } catch (error) {
             onFailure(
               test,
@@ -243,3 +216,88 @@ export default class TestRunner {
     }
   }
 }
+
+const _runTest = async (
+  test,
+  {keepProcessAlive, globalConfig, atomExecutable, testTeardown, runID},
+) => {
+  const config = test.context.config;
+  const {atomHome, userHome} = makeTmpDirs(runID);
+  let processOutput = [];
+  const onOutput = (pipe: string, data: string) => {
+    const message = data.toString ? data.toString() : data;
+    processOutput.push({
+      message,
+      origin: `Atom process ${pipe}`,
+      type: 'log',
+    });
+  };
+  const nuclideE2ERPCProcess = new NuclideE2ERPCProcess({
+    spawn: spawnAtomProcess.bind(null, {
+      atomHome,
+      atomExecutable,
+      onOutput,
+      runID,
+      userHome,
+    }),
+  });
+  const directives = Docblock.fromFile(test.path).getDirectives();
+  for (const setupFile of config.setupFiles) {
+    // $FlowFixMe dynamic require
+    const setup = require(setupFile); // if it's a function call it and pass arguments. This is different
+    // from how Jest works, but right now there's no other workaround to it
+    typeof setup === 'function' && (await setup({atomHome, directives}));
+  }
+  await nuclideE2ERPCProcess.start();
+
+  const localCleanup = once(() => {
+    nuclideE2ERPCProcess.remote.shutDown();
+    nuclideE2ERPCProcess.stop();
+    testTeardown && testTeardown({runID, atomHome});
+  });
+  // Add to global cleanup in case the process crashes or something. We still want to kill all
+  // subprocesses.
+  thingsToCleanUp.push(localCleanup);
+  const testResult: TestResultBase = await nuclideE2ERPCProcess.remote.runTest({
+    config,
+    globalConfig,
+    path: test.path,
+  });
+  // We'll reuse `expand` flag (not the best idea) to keep the nuclide process
+  // alive if we want to go back and debug something.
+  if (!keepProcessAlive) {
+    localCleanup();
+  }
+  return {processOutput, testResult};
+};
+
+// Add values to the test result that are specific to this runner.
+const amendTestResult = ({
+  testResult,
+  processOutput,
+  consoleFilter,
+  runID,
+}): TestResult => {
+  const amendedTestResult = {
+    ...testResult,
+    runID,
+    console: processOutput.length
+      ? // Add messages from process output to test results
+        [...processOutput, ...(testResult.console || [])]
+      : testResult.console,
+  };
+  amendedTestResult.console = consoleFilter(testResult.console);
+  return amendedTestResult;
+};
+
+const hasFailed = testResult => {
+  if (testResult.numFailingTests) {
+    return true;
+  }
+
+  if (testResult.testExecError) {
+    return true;
+  }
+
+  return false;
+};
