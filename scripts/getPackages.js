@@ -15,6 +15,7 @@ const path = require('path');
 const PACKAGES_DIR = path.resolve(__dirname, '../packages');
 
 module.exports = () => {
+  // $FlowFixMe
   return fs
     .readdirSync(PACKAGES_DIR)
     .map(file => path.resolve(PACKAGES_DIR, file))

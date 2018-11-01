@@ -82,6 +82,7 @@ export default class TestRunner {
           });
         },
       });
+      await jestWorkerRPCProcess.start();
     }
 
     const cleanup = once(() => {
@@ -92,6 +93,9 @@ export default class TestRunner {
       cleanup();
       process.exit(130);
     });
+    process.on('exit', () => {
+      cleanup();
+    });
     process.on('uncaughtException', () => {
       cleanup();
       // This will prevent other handlers to handle errors
@@ -100,7 +104,6 @@ export default class TestRunner {
       process.exit(1);
     });
 
-    await jestWorkerRPCProcess.start();
     await Promise.all(
       tests.map(
         throat(concurrency, test => {
