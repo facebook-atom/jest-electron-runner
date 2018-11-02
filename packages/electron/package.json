@@ -7,6 +7,7 @@
     "homepage": "https://github.com/facebook-atom/jest-electron-runner",
     "repository": "https://github.com/facebook-atom/jest-electron-runner",
     "dependencies": {
+        "app-root-path": "^2.0.1",
         "@jest-runner/core": "^0.0.14",
         "@jest-runner/rpc": "^0.0.14",
         "electron": "^2.0.8",
