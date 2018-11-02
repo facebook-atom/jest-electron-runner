@@ -12,6 +12,7 @@ jobs:
       - run: yarn build
       - run: yarn flow
       - run: yarn lint
+      - run: yarn test --showConfig
       - run: yarn test
       - run: cd electron_3_test_project && yarn --no-progress
       - run: cd electron_3_test_project && yarn test

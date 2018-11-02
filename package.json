@@ -40,7 +40,7 @@
     "build-watch": "flow-node ./scripts/build && flow-node ./scripts/build-watch",
     "clean": "rm -rf ./packages/*/build",
     "lint": "eslint .",
-    "test": "jest",
+    "test": "jest -w 3",
     "test-all": "yarn flow && yarn test && yarn lint",
     "gen-rpc": "node packages/rpc/bin/cli.js packages/*/src/rpc/{JestWorkerRPC,NuclideE2ERPC}.js"
   },
