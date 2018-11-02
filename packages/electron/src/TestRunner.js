@@ -78,8 +78,9 @@ export default class TestRunner {
           const injectedCodePath = require.resolve(
             './electron_process_injected_code.js',
           );
+          const currentNodeBinPath = process.execPath;
           const electronBin = getElectronBin(this._globalConfig.rootDir);
-          return spawn(electronBin, [injectedCodePath], {
+          return spawn(currentNodeBinPath, [electronBin, injectedCodePath], {
             stdio: [
               'inherit',
               // redirect child process' stdout to parent process stderr, so it
