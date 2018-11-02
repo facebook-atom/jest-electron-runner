@@ -26,17 +26,7 @@ import type {ServerID} from '../../core/src/utils';
 // the whole thing in watch mode every time.
 let jestWorkerRPCProcess;
 
-// Prefer the Electron installed in the project's root directory. This allows
-// the user's Electron version to be used when resolving native native module
-// paths. Example: (notice v3.0 vs. v2.0)
-//   node_modules/sqlite3/lib/binding/electron-v3.0-darwin-x64/node_sqlite3.node
-//   vs.
-//   node_modules/sqlite3/lib/binding/electron-v2.0-darwin-x64/node_sqlite3.node
-// For development, the Electron version in jest-electron-runner's package.json
-// will be used.
-// https://github.com/facebook-atom/jest-electron-runner/issues/6
-const appRoot = require('app-root-path');
-const ELECTRON_BIN = path.join(appRoot.path, 'node_modules', 'electron', 'cli.js');
+const ELECTRON_BIN = path.resolve(require.resolve('electron'), '..', 'cli.js');
 
 const once = fn => {
   let hasBeenCalled = false;
