@@ -13,6 +13,8 @@ jobs:
       - run: yarn flow
       - run: yarn lint
       - run: yarn test
+      - run: cd electron_3_test_project && yarn --no-progress
+      - run: cd electron_3_test_project && yarn test
 
 workflows:
   version: 2

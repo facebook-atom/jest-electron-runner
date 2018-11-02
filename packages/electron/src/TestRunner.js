@@ -26,7 +26,20 @@ import type {ServerID} from '../../core/src/utils';
 // the whole thing in watch mode every time.
 let jestWorkerRPCProcess;
 
-const ELECTRON_BIN = path.resolve(require.resolve('electron'), '..', 'cli.js');
+const getElectronBin = (from: string) => {
+  try {
+    // first try to resolve from the `rootDir` of the project
+    return path.resolve(
+      // $FlowFixMe wrong core flow types for require.resolve
+      require.resolve('electron', {paths: [from]}),
+      '..',
+      'cli.js',
+    );
+  } catch (error) {
+    // default to electron included in this package's dependencies
+    return path.resolve(require.resolve('electron'), '..', 'cli.js');
+  }
+};
 
 const once = fn => {
   let hasBeenCalled = false;
@@ -65,7 +78,8 @@ export default class TestRunner {
           const injectedCodePath = require.resolve(
             './electron_process_injected_code.js',
           );
-          return spawn(ELECTRON_BIN, [injectedCodePath], {
+          const electronBin = getElectronBin(this._globalConfig.rootDir);
+          return spawn(electronBin, [injectedCodePath], {
             stdio: [
               'inherit',
               // redirect child process' stdout to parent process stderr, so it
