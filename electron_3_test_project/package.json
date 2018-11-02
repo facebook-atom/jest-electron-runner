@@ -1,0 +1,8 @@
+{
+  "dependencies": {
+    "electron": "3"
+  },
+  "scripts": {
+    "test": "../node_modules/.bin/jest"
+  }
+}

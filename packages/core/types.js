@@ -8,6 +8,7 @@
  */
 
 export type GlobalConfig = {
+  rootDir: string,
   expand: boolean,
   maxWorkers: number,
   verbose: boolean,
