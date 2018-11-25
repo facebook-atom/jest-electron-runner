@@ -55,9 +55,18 @@ export default class TestRunner {
   _globalConfig: GlobalConfig;
   _serverID: ServerID;
   _ipcServerPromise: Promise<IPCServer>;
+  _processEventRegistered: Object;
 
   constructor(globalConfig: GlobalConfig) {
     this._globalConfig = globalConfig;
+    this._processEventRegistered = {};
+  }
+
+  registerProcessListener(channel: string, cb: Function) {
+    if (this._processEventRegistered[channel]) return;
+
+    this._processEventRegistered[channel] = true;
+    process.on(channel, cb);
   }
 
   async runTests(
@@ -104,14 +113,16 @@ export default class TestRunner {
       jestWorkerRPCProcess.stop();
     });
 
-    process.on('SIGINT', () => {
+    this.registerProcessListener('SIGINT', () => {
       cleanup();
       process.exit(130);
     });
-    process.on('exit', () => {
+
+    this.registerProcessListener('exit', () => {
       cleanup();
     });
-    process.on('uncaughtException', () => {
+
+    this.registerProcessListener('uncaughtException', () => {
       cleanup();
       // This will prevent other handlers to handle errors
       // (e.g. global Jest handler). TODO: find a way to provide
