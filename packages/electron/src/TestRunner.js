@@ -55,11 +55,9 @@ export default class TestRunner {
   _globalConfig: GlobalConfig;
   _serverID: ServerID;
   _ipcServerPromise: Promise<IPCServer>;
-  _processEventRegistered: Object;
 
   constructor(globalConfig: GlobalConfig) {
     this._globalConfig = globalConfig;
-    this._processEventRegistered = {};
   }
 
   async runTests(
