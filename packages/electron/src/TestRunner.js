@@ -62,13 +62,6 @@ export default class TestRunner {
     this._processEventRegistered = {};
   }
 
-  registerProcessListener(channel: string, cb: Function) {
-    if (this._processEventRegistered[channel]) return;
-
-    this._processEventRegistered[channel] = true;
-    process.on(channel, cb);
-  }
-
   async runTests(
     tests: Array<Test>,
     watcher: Watcher,
@@ -113,16 +106,16 @@ export default class TestRunner {
       jestWorkerRPCProcess.stop();
     });
 
-    this.registerProcessListener('SIGINT', () => {
+    registerProcessListener('SIGINT', () => {
       cleanup();
       process.exit(130);
     });
 
-    this.registerProcessListener('exit', () => {
+    registerProcessListener('exit', () => {
       cleanup();
     });
 
-    this.registerProcessListener('uncaughtException', () => {
+    registerProcessListener('uncaughtException', () => {
       cleanup();
       // This will prevent other handlers to handle errors
       // (e.g. global Jest handler). TODO: find a way to provide
@@ -160,3 +153,18 @@ export default class TestRunner {
     }
   }
 }
+
+// Because in watch mode the TestRunner is recreated each time, we have
+// to make sure we're not registering new process events on every test
+// run trigger (at some point EventEmitter will start complaining about a
+// memory leak if we do).We'll keep a global map of callbalks (because
+// `process` is global) and deregister the old callbacks before we register
+// new ones.
+const REGISTERED_PROCESS_EVENTS_MAP = new Map();
+const registerProcessListener = (eventName: string, cb: Function) => {
+  if (REGISTERED_PROCESS_EVENTS_MAP.has(eventName)) {
+    (process: any).off(eventName, REGISTERED_PROCESS_EVENTS_MAP.get(eventName));
+  }
+  process.on(eventName, cb);
+  REGISTERED_PROCESS_EVENTS_MAP.set(eventName, cb);
+};
