@@ -24,6 +24,11 @@ A custom test runner for Jest that runs tests inside an [electron](https://elect
     <img src="https://raw.githubusercontent.com/aaronabramov/gifs/master/jest_electron_runner_seutup.gif" />
 </h1>
 
+### Debugging
+Normally jest-electron-runner runs a headless instance of electron. You may show the UI by adding this to your test:
+```js
+require('electron').remote.getCurrentWindow().show();
+```
 
 ### [Code of Conduct](https://code.facebook.com/codeofconduct)
 
