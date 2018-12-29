@@ -16,6 +16,7 @@ import {app, BrowserWindow} from 'electron';
 
 import RPCConnection from '@jest-runner/rpc/RPCConnection';
 import JestWorkerRPC from './rpc/JestWorkerRPC';
+import JestWorkerRPCMain from './rpc/JestWorkerRPCMain';
 
 app.on('ready', async () => {
   // electron automatically quits if all windows are destroyed,
@@ -23,6 +24,16 @@ app.on('ready', async () => {
   // are gone. There's probably a better way to do it.
   // eslint-disable-next-line no-unused-vars
   const mainWindow = new BrowserWindow({show: false});
-  const rpcConnection = new RPCConnection(JestWorkerRPC);
-  await rpcConnection.connect();
+
+  if (process.env.isMain) {
+    // we spin up an electron process for each test on the main process
+    // which pops up an icon for each on macOs. Hiding them is less intrusive
+    app.dock.hide();
+
+    const rpcConnectionMain = new RPCConnection(JestWorkerRPCMain);
+    await rpcConnectionMain.connect();
+  } else {
+    const rpcConnection = new RPCConnection(JestWorkerRPC);
+    await rpcConnection.connect();
+  }
 });
