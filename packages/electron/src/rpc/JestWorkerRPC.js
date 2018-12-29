@@ -9,6 +9,7 @@
 
 import type {TestResult} from '@jest-runner/core/types';
 import type {IPCTestData} from '../../types';
+import runTest from 'jest-runner/build/run_test';
 
 import {
   makeUniqWorkerId,
@@ -16,8 +17,31 @@ import {
 } from '@jest-runner/core/utils';
 
 import {BrowserWindow, ipcMain} from 'electron';
+import {getResolver} from '../utils/resolver';
 
-const _runTest = (testData: IPCTestData): Promise<TestResult> => {
+const isMain = process.env.isMain === 'true';
+
+const _runInNode = async (testData: IPCTestData): Promise<TestResult> => {
+  try {
+    return runTest(
+      testData.path,
+      testData.globalConfig,
+      testData.config,
+      getResolver(testData.config, testData.rawModuleMap),
+    );
+  } catch (error) {
+    // eslint-disable-next-line no-console
+    console.error(error);
+    return buildFailureTestResult(
+      testData.path,
+      error,
+      testData.config,
+      testData.globalConfig,
+    );
+  }
+};
+
+const _runInBrowserWindow = (testData: IPCTestData): Promise<TestResult> => {
   return new Promise(resolve => {
     const workerID = makeUniqWorkerId();
     const win = new BrowserWindow({show: false});
@@ -40,6 +64,10 @@ const _runTest = (testData: IPCTestData): Promise<TestResult> => {
     );
     return testResult;
   });
+};
+
+const _runTest = (testData: IPCTestData): Promise<TestResult> => {
+  return isMain ? _runInNode(testData) : _runInBrowserWindow(testData);
 };
 
 module.exports = {

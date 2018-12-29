@@ -20,3 +20,5 @@ export type IPCTestData = {
   globalConfig: GlobalConfig,
   path: string,
 };
+
+export type TestRunnerTarget = 'renderer' | 'main';

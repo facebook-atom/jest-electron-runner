@@ -15,46 +15,95 @@ import type {
   Watcher,
 } from '@jest-runner/core/types';
 import type {IPCServer} from '../../core/src/ipc-server';
+import type {TestRunnerTarget} from '../types.js';
 
 import {spawn} from 'child_process';
+import {once} from './utils/once.js';
 import JestWorkerRpcProcess from './rpc/JestWorkerRPCProcess.generated';
-import path from 'path';
+import {getElectronBin} from './utils/get_electron_bin.js';
 import throat from 'throat';
-import type {ServerID} from '../../core/src/utils';
 
 // Share ipc server and farm between multiple runs, so we don't restart
 // the whole thing in watch mode every time.
-let jestWorkerRPCProcess;
+let jestWorkerRPCProcess: ?JestWorkerRpcProcess;
 
-const getElectronBin = (from: string) => {
-  try {
-    // first try to resolve from the `rootDir` of the project
-    return path.resolve(
-      // $FlowFixMe wrong core flow types for require.resolve
-      require.resolve('electron', {paths: [from]}),
-      '..',
-      'cli.js',
-    );
-  } catch (error) {
-    // default to electron included in this package's dependencies
-    return path.resolve(require.resolve('electron'), '..', 'cli.js');
+const isMain = target => target === 'main';
+const isRenderer = target => target === 'renderer';
+
+const startWorker = async ({
+  rootDir,
+  target,
+}): Promise<JestWorkerRpcProcess> => {
+  if (isRenderer(target) && jestWorkerRPCProcess) {
+    return jestWorkerRPCProcess;
   }
+
+  const proc = new JestWorkerRpcProcess({
+    spawn: ({serverID}) => {
+      const injectedCodePath = require.resolve(
+        './electron_process_injected_code.js',
+      );
+      const currentNodeBinPath = process.execPath;
+      const electronBin = getElectronBin(rootDir);
+      return spawn(currentNodeBinPath, [electronBin, injectedCodePath], {
+        stdio: [
+          'inherit',
+          // redirect child process' stdout to parent process stderr, so it
+          // doesn't break any tools that depend on stdout (like the ones
+          // that consume a generated JSON report from jest's stdout)
+          process.stderr,
+          'inherit',
+        ],
+        env: {
+          ...process.env,
+          ...(isMain(target) ? {isMain: 'true'} : {}),
+          JEST_SERVER_ID: serverID,
+        },
+        detached: true,
+      });
+    },
+  });
+
+  if (isRenderer(target)) {
+    jestWorkerRPCProcess = proc;
+  }
+
+  await proc.start();
+  DISPOSABLES.add(() => {
+    proc.stop();
+  });
+
+  return proc;
 };
 
-const once = fn => {
-  let hasBeenCalled = false;
-  return (...args) => {
-    if (!hasBeenCalled) {
-      hasBeenCalled = true;
-      return fn(...args);
-    }
-  };
+const registerProcessListeners = (cleanup: Function) => {
+  registerProcessListener('SIGINT', () => {
+    cleanup();
+    process.exit(130);
+  });
+
+  registerProcessListener('exit', () => {
+    cleanup();
+  });
+
+  registerProcessListener('uncaughtException', () => {
+    cleanup();
+    // This will prevent other handlers to handle errors
+    // (e.g. global Jest handler). TODO: find a way to provide
+    // a cleanup function to Jest so it runs it instead
+    process.exit(1);
+  });
 };
+
+const DISPOSABLES = new Set();
 
 export default class TestRunner {
   _globalConfig: GlobalConfig;
-  _serverID: ServerID;
   _ipcServerPromise: Promise<IPCServer>;
+
+  getTarget(): TestRunnerTarget {
+    throw new Error('Must be implemented in a subclass');
+  }
 
   constructor(globalConfig: GlobalConfig) {
     this._globalConfig = globalConfig;
@@ -68,67 +117,32 @@ export default class TestRunner {
     onFailure: (Test, Error) => void,
   ) {
     const isWatch = this._globalConfig.watch || this._globalConfig.watchAll;
-    const concurrency = isWatch
-      ? 1
-      : Math.min(tests.length, this._globalConfig.maxWorkers);
-
-    if (!jestWorkerRPCProcess) {
-      jestWorkerRPCProcess = new JestWorkerRpcProcess({
-        spawn: ({serverID}) => {
-          const injectedCodePath = require.resolve(
-            './electron_process_injected_code.js',
-          );
-          const currentNodeBinPath = process.execPath;
-          const electronBin = getElectronBin(this._globalConfig.rootDir);
-          return spawn(currentNodeBinPath, [electronBin, injectedCodePath], {
-            stdio: [
-              'inherit',
-              // redirect child process' stdout to parent process stderr, so it
-              // doesn't break any tools that depend on stdout (like the ones
-              // that consume a generated JSON report from jest's stdout)
-              process.stderr,
-              'inherit',
-            ],
-            env: {
-              ...process.env,
-              JEST_SERVER_ID: serverID,
-            },
-            detached: true,
-          });
-        },
-      });
-      await jestWorkerRPCProcess.start();
-    }
+    const {maxWorkers, rootDir} = this._globalConfig;
+    const concurrency = isWatch ? 1 : Math.min(tests.length, maxWorkers);
+    const target = this.getTarget();
 
     const cleanup = once(() => {
-      jestWorkerRPCProcess.stop();
+      for (const dispose of DISPOSABLES) {
+        dispose();
+        DISPOSABLES.delete(dispose);
+      }
     });
 
-    registerProcessListener('SIGINT', () => {
-      cleanup();
-      process.exit(130);
-    });
+    registerProcessListeners(cleanup);
 
-    registerProcessListener('exit', () => {
-      cleanup();
-    });
-
-    registerProcessListener('uncaughtException', () => {
-      cleanup();
-      // This will prevent other handlers to handle errors
-      // (e.g. global Jest handler). TODO: find a way to provide
-      // a cleanup function to Jest so it runs it instead
-      process.exit(1);
-    });
+    // Startup the process for renderer tests, since it'll be one
+    // process that every test will share.
+    isRenderer(target) && (await startWorker({rootDir, target}));
 
     await Promise.all(
       tests.map(
-        throat(concurrency, test => {
+        throat(concurrency, async test => {
           onStart(test);
           const rawModuleMap = test.context.moduleMap.getRawModuleMap();
           const config = test.context.config;
           const globalConfig = this._globalConfig;
-          return jestWorkerRPCProcess.remote
+          const rpc = await startWorker({rootDir, target});
+          await rpc.remote
             .runTest({
               rawModuleMap,
               config,
@@ -142,6 +156,9 @@ export default class TestRunner {
                 : onResult(test, testResult);
             })
             .catch(error => onFailure(test, error));
+          // If we're running tests in electron 'main' process
+          // we need to respawn them for every single test.
+          isMain(target) && rpc.stop();
         }),
       ),
     );

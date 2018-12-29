@@ -56,7 +56,7 @@ export default class RPCProcess<Methods> {
     throw new Error('not implemented');
   }
 
-  async start() {
+  async start(): Promise<void> {
     this._ipc.config.id = this.serverID;
     this._ipc.config.retry = 1500;
     this._ipc.config.silent = true;
@@ -76,12 +76,13 @@ export default class RPCProcess<Methods> {
       });
       this._ipc.server.start();
     });
+
     this._socket = socket;
   }
 
   stop() {
     this.server && this.server.stop();
-    if (this._subprocess) {
+    if (this._subprocess && this.isAlive) {
       try {
         process.kill(-this._subprocess.pid, 'SIGKILL');
         // eslint-disable-next-line no-empty

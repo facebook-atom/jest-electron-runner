@@ -5,13 +5,15 @@
  * LICENSE file in the root directory of this source tree.
  *
  * @flow
+ * @format
  */
 
-module.exports = {
-  projects: [
-    './jest_configs/jest.config.renderer.js',
-    './jest_configs/jest.config.main.js',
-    './jest_configs/jest.config.node.js',
-    './jest_configs/jest.config.fiddle.js',
-  ],
+export const once = (fn: Function) => {
+  let hasBeenCalled = false;
+  return (...args: any) => {
+    if (!hasBeenCalled) {
+      hasBeenCalled = true;
+      return fn(...args);
+    }
+  };
 };
