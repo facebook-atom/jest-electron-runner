@@ -25,7 +25,7 @@ app.on('ready', async () => {
   // eslint-disable-next-line no-unused-vars
   const mainWindow = new BrowserWindow({show: false});
 
-  if (process.env.isMain) {
+  if (process.env.isMain.toLowerCase() === 'true') {
     // we spin up an electron process for each test on the main process
     // which pops up an icon for each on macOs. Hiding them is less intrusive
     app.dock.hide();
