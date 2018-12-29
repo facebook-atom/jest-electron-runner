@@ -76,6 +76,7 @@ export default class RPCProcess<Methods> {
       });
       this._ipc.server.start();
     });
+
     this._socket = socket;
   }
 
@@ -134,6 +135,8 @@ export default class RPCProcess<Methods> {
     }
   }
 }
+
+const RPC_PROC = new Map();
 
 const getBabelNodeBin = () =>
   path.resolve(__dirname, '../../../node_modules/.bin/babel-node');

@@ -8,4 +8,4 @@
  * @format
  */
 
-module.exports = require('./build/TestRunnerRenderer.js').default;
+module.exports = require('./build/TestRunnerMain.js').default;
