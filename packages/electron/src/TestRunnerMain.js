@@ -16,9 +16,9 @@ import type {
 } from '@jest-runner/core/types';
 import type {IPCServer} from '../../core/src/ipc-server';
 
-import path from 'path';
 import throat from 'throat';
 import type {ServerID} from '../../core/src/utils';
+import type {TestRunnerOptions} from '../../core/types';
 import {spawnRpcProcess} from './utils/spawnRpcProcess';
 import {once} from './utils/once';
 import TestRunnerBase from './TestRunnerBase';
@@ -45,7 +45,7 @@ export default class TestRunner extends TestRunnerBase {
     onStart: Test => void,
     onResult: (Test, TestResult) => void,
     onFailure: (Test, Error) => void,
-    options,
+    options: TestRunnerOptions,
   ) {
     const isWatch = this._globalConfig.watch || this._globalConfig.watchAll;
     const concurrency = options.serial
@@ -69,7 +69,9 @@ export default class TestRunner extends TestRunnerBase {
             RPC_PROCESS_CACHE.set(test.path, rpc);
           } else rpc = RPC_PROCESS_CACHE.get(test.path);
 
+          // $FlowFixMe returns rpc as undefined, when we know it does not
           await rpc.start();
+          // $FlowFixMe returns rpc as undefined, when we know it does not
           return rpc.remote
             .runTest({
               rawModuleMap,
@@ -83,6 +85,7 @@ export default class TestRunner extends TestRunnerBase {
                   onFailure(test, testResult.testExecError)
                 : onResult(test, testResult);
 
+              // $FlowFixMe returns rpc as undefined, when we know it does not
               rpc.stop();
             })
             .catch(error => onFailure(test, error));
@@ -95,18 +98,3 @@ export default class TestRunner extends TestRunnerBase {
     }
   }
 }
-
-// Because in watch mode the TestRunner is recreated each time, we have
-// to make sure we're not registering new process events on every test
-// run trigger (at some point EventEmitter will start complaining about a
-// memory leak if we do).We'll keep a global map of callbalks (because
-// `process` is global) and deregister the old callbacks before we register
-// new ones.
-const REGISTERED_PROCESS_EVENTS_MAP = new Map();
-const registerProcessListener = (eventName: string, cb: Function) => {
-  if (REGISTERED_PROCESS_EVENTS_MAP.has(eventName)) {
-    (process: any).off(eventName, REGISTERED_PROCESS_EVENTS_MAP.get(eventName));
-  }
-  process.on(eventName, cb);
-  REGISTERED_PROCESS_EVENTS_MAP.set(eventName, cb);
-};

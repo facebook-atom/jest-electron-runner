@@ -9,8 +9,6 @@
 import type {TestResult} from '@jest-runner/core/types';
 import type {IPCTestData} from '../../types';
 import runTest from 'jest-runner/build/run_test';
-import docblock from '@jest-runner/core/docblock';
-import fs from 'fs';
 
 import {buildFailureTestResult} from '@jest-runner/core/utils';
 

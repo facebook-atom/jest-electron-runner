@@ -36,6 +36,10 @@ export type Test = {
   config: ProjectConfig,
 };
 
+export type TestRunnerOptions = {
+  serial: boolean,
+};
+
 export type Watcher = any;
 
 export type TestResult = {|

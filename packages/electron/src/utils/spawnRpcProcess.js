@@ -12,7 +12,13 @@ import JestWorkerRpcMainProcess from '../rpc/JestWorkerRPCMainProcess.generated'
 import {getElectronBin} from './getElectronBin';
 import {spawn} from 'child_process';
 
-export const spawnRpcProcess = ({globalConfig, isMain = false}) => {
+export const spawnRpcProcess = ({
+  globalConfig,
+  isMain = false,
+}: {
+  globalConfig: GlobalConfig,
+  isMain: boolean,
+}) => {
   return new JestWorkerRpcMainProcess({
     spawn: ({serverID}) => {
       const injectedCodePath = require.resolve(

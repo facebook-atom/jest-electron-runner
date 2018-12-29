@@ -15,10 +15,6 @@ import type {
   Watcher,
 } from '@jest-runner/core/types';
 import type {IPCServer} from '../../core/src/ipc-server';
-
-import {spawn} from 'child_process';
-import JestWorkerRpcProcess from './rpc/JestWorkerRPCProcess.generated';
-import path from 'path';
 import throat from 'throat';
 import type {ServerID} from '../../core/src/utils';
 import {spawnRpcProcess} from './utils/spawnRpcProcess';

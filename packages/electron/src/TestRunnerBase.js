@@ -8,19 +8,9 @@
  * @format
  */
 
-import type {
-  GlobalConfig,
-  Test,
-  TestResult,
-  Watcher,
-} from '@jest-runner/core/types';
+import type {GlobalConfig, Test} from '@jest-runner/core/types';
 import type {IPCServer} from '../../core/src/ipc-server';
-
-import path from 'path';
-import throat from 'throat';
 import type {ServerID} from '../../core/src/utils';
-import {spawnRpcProcess, closeAllRpcProcesses} from './utils/spawnRpcProcess';
-import {once} from './utils/once';
 
 export default class TestRunnerBase {
   _globalConfig: GlobalConfig;
@@ -34,15 +24,18 @@ export default class TestRunnerBase {
 
   processListenersInit() {
     registerProcessListener('SIGINT', () => {
+      // $FlowFixMe calling this method on subclass like an abstract class
       this.cleanup();
       process.exit(130);
     });
 
     registerProcessListener('exit', () => {
+      // $FlowFixMe calling this method on subclass like an abstract class
       this.cleanup();
     });
 
     registerProcessListener('uncaughtException', () => {
+      // $FlowFixMe calling this method on subclass like an abstract class
       this.cleanup();
       // This will prevent other handlers to handle errors
       // (e.g. global Jest handler). TODO: find a way to provide
@@ -51,7 +44,7 @@ export default class TestRunnerBase {
     });
   }
 
-  testRunContext = test => ({
+  testRunContext = (test: Test) => ({
     rawModuleMap: test.context.moduleMap.getRawModuleMap(),
     config: test.context.config,
   });
