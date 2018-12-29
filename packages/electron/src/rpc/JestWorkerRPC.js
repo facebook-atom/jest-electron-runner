@@ -10,8 +10,6 @@
 import type {TestResult} from '@jest-runner/core/types';
 import type {IPCTestData} from '../../types';
 import runTest from 'jest-runner/build/run_test';
-import docblock from '@jest-runner/core/docblock';
-import fs from 'fs';
 
 import {
   makeUniqWorkerId,
@@ -19,9 +17,11 @@ import {
 } from '@jest-runner/core/utils';
 
 import {BrowserWindow, ipcMain} from 'electron';
-import {getResolver} from '../resolver';
+import {getResolver} from '../utils/resolver';
 
-const _runInNode = async (testData: IPCTestData) => {
+const isMain = process.env.isMain === 'true';
+
+const _runInNode = async (testData: IPCTestData): Promise<TestResult> => {
   try {
     return runTest(
       testData.path,
@@ -67,17 +67,7 @@ const _runInBrowserWindow = (testData: IPCTestData): Promise<TestResult> => {
 };
 
 const _runTest = (testData: IPCTestData): Promise<TestResult> => {
-  const parsedDocblock = docblock.parse(fs.readFileSync(testData.path, 'utf8'));
-  const docblockNode = parsedDocblock.nodes.filter(
-    // todo: import type DocblockNode
-    (d: any) => d.name === 'jest-environment',
-  )[0];
-
-  const docblockOverride = docblockNode ? docblockNode.value : '';
-
-  return docblockOverride === 'node'
-    ? _runInNode(testData)
-    : _runInBrowserWindow(testData);
+  return isMain ? _runInNode(testData) : _runInBrowserWindow(testData);
 };
 
 module.exports = {

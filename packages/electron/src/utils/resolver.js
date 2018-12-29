@@ -1,3 +1,14 @@
+/**
+ * Copyright (c) 2014-present, Facebook, Inc. All rights reserved.
+ *
+ * This source code is licensed under the MIT license found in the
+ * LICENSE file in the root directory of this source tree.
+ *
+ * @flow
+ */
+
+import type {RawModuleMap, ProjectConfig} from '@jest-runner/core/types';
+
 import Runtime from 'jest-runtime';
 import HasteMap from 'jest-haste-map';
 
@@ -30,7 +41,10 @@ const wrapResolver = resolver => {
 };
 
 const resolvers = Object.create(null);
-export const getResolver = (config, rawModuleMap) => {
+export const getResolver = (
+  config: ProjectConfig,
+  rawModuleMap: RawModuleMap,
+) => {
   // In watch mode, the raw module map with all haste modules is passed from
   // the test runner to the watch command. This is because jest-haste-map's
   // watch mode does not persist the haste map on disk after every file change.

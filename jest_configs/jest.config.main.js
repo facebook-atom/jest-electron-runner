@@ -12,11 +12,11 @@ const path = require('path');
 const p = relative => path.resolve(__dirname, '../', relative);
 
 module.exports = {
-  displayName: 'electron',
+  displayName: 'main',
   rootDir: p(''),
   roots: [p('')],
-  testMatch: ['**/__electron_tests__/**/*.js?(x)'],
-  runner: p('packages/electron'),
+  testMatch: ['**/__main_process_tests__/**/*.js?(x)'],
+  runner: p('packages/electron/main'),
   testRunner: require.resolve('jest-circus/runner'),
   testEnvironment: p('packages/electron/environment'),
   testPathIgnorePatterns: ['/node_modules/', 'electron_3_test_project'],

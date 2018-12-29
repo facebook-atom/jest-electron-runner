@@ -6,7 +6,6 @@ A custom test runner for Jest that runs tests inside an [electron](https://elect
 
 - Main
   - all electron instance modules (ipc, app, etc)
-  - testing native modules with the node version of the electron binary being distributed
 
 - Renderer
   - full access to a browser environment without the need for jsdom or similar modules
