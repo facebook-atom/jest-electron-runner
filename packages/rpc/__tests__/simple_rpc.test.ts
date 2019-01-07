@@ -4,10 +4,10 @@
  * This source code is licensed under the MIT license found in the
  * LICENSE file in the root directory of this source tree.
  *
- * @flow
  */
-
 import path from 'path';
+
+// @ts-ignore until can generate from typescript
 import SimpleRPCPRocess from '../__fixtures__/simple_rpc/SimpleRPCProcess.generated';
 
 let processes = [];

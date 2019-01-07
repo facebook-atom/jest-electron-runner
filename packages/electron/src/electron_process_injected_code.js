@@ -14,7 +14,7 @@ delete global.console;
 global.console = new Console(process.stdout, process.stderr);
 import {app, BrowserWindow} from 'electron';
 
-import RPCConnection from '@jest-runner/rpc/RPCConnection';
+import {RPCConnection} from '@jest-runner/rpc';
 import JestWorkerRPC from './rpc/JestWorkerRPC';
 
 const isMain = process.env.isMain === 'true';

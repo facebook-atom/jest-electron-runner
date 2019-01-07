@@ -7,7 +7,7 @@
  * @flow
  */
 
-import RPCConnection from '../../RPCConnection';
+import {RPCConnection} from '../../index.js';
 import SimpleRPC from './SimpleRPC';
 
 const connection = new RPCConnection(SimpleRPC);

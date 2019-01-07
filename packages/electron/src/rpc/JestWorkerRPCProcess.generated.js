@@ -3,11 +3,12 @@
  * THIS IS A GENERATED FILE. DO NOT MODIFY IT MANUALLY!
  * ****************************************************
  * @flow
- * @generated 65cf6e68c243bb4f0ab6c32d61b6f5a4
+ * @generated c0032ec975761367b96aeb76fc7c7b5c
  */
 
 import typeof Methods from './JestWorkerRPC.js';
-import RPCProcess from '@jest-runner/rpc/RPCProcess';
+
+import {RPCProcess} from '@jest-runner/rpc';
 
 class JestWorkerRPCProcess extends RPCProcess<Methods> {
   initializeRemote(): Methods {

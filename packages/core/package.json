@@ -1,12 +1,12 @@
 {
-    "name": "@jest-runner/core",
-    "version": "0.1.0",
-    "description": "Shared code for Jest test runner packages",
-    "author": "Aaron Abramov",
-    "license": "MIT",
-    "homepage": "https://github.com/facebook-atom/jest-electron-runner",
-    "repository": "https://github.com/facebook-atom/jest-electron-runner",
-    "dependencies": {
-        "node-ipc": "^9.1.1"
-    }
+  "name": "@jest-runner/core",
+  "version": "0.1.0",
+  "description": "Shared code for Jest test runner packages",
+  "author": "Aaron Abramov",
+  "license": "MIT",
+  "homepage": "https://github.com/facebook-atom/jest-electron-runner",
+  "repository": "https://github.com/facebook-atom/jest-electron-runner",
+  "dependencies": {
+    "node-ipc": "^9.1.1"
+  }
 }

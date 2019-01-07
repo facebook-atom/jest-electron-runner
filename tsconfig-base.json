@@ -1,0 +1,32 @@
+{
+  "compilerOptions": {
+    "allowJs": false,
+    "checkJs": false,
+    "target": "es2017",
+    "composite": true,
+    "declaration": true,
+    "declarationMap": false,
+    "emitDeclarationOnly": true,
+    "allowSyntheticDefaultImports": true,
+    "baseUrl": ".",
+    "module": "commonjs",
+    "moduleResolution": "node",
+    "esModuleInterop": true,
+    "emitDecoratorMetadata": true,
+    "experimentalDecorators": true,
+    "importHelpers": true,
+    "noFallthroughCasesInSwitch": true,
+    "noImplicitReturns": true,
+    "noStrictGenericChecks": true,
+    "noUnusedLocals": true,
+    "noUnusedParameters": true,
+    "plugins": [
+      {
+        "name": "tslint-language-service",
+        "alwaysShowRuleFailuresAsWarnings": false,
+        "ignoreDefinitionFiles": true
+      }
+    ],
+    "strict": true
+  }
+}

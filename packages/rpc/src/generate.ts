@@ -4,29 +4,29 @@
  * This source code is licensed under the MIT license found in the
  * LICENSE file in the root directory of this source tree.
  *
- * @flow
  */
-
 import crypto from 'crypto';
-import Docblock from '@jest-runner/core/docblock';
 import fs from 'fs';
 import globLib from 'glob';
 import j from 'jscodeshift';
 import path from 'path';
 import prettier from 'prettier';
 
-const DEFAULT_RPC_PROCESS_PATH = '@jest-runner/rpc/RPCProcess';
+// @ts-ignore until module is typed
+import Docblock from '@jest-runner/core/build/docblock';
 
-type GenerateOptions = {|
-  globs: Array<string>,
+const DEFAULT_RPC_PROCESS_PATH = '@jest-runner/rpc';
+
+type GenerateOptions = {
+  globs: string[],
   RPCProcessPath?: string,
-|};
+};
 
 export const generate = async (options: GenerateOptions) => {
   const files = await prepareFiles(options);
+
   files.forEach(([filePath, source]) => {
     fs.writeFileSync(filePath, source);
-    // eslint-disable-next-line no-console
     console.log(`write: ${filePath}`);
   });
 };
@@ -36,34 +36,44 @@ export const prepareFiles = async ({
   RPCProcessPath = DEFAULT_RPC_PROCESS_PATH,
 }: GenerateOptions) => {
   const files = globs.reduce(
-    (files, glob) => files.concat(globLib.sync(glob)),
+    (files: string[], glob) => files.concat(globLib.sync(glob)),
     [],
   );
   return Promise.all(
-    files.map(async file => {
-      // eslint-disable-next-line no-console
+    files.map(async (file: string) => {
       console.log(`generating: ${file}`);
-      if (!file.match(/\.js$/)) {
+
+      const {isJsFile, isTsFile} = getFileType(file);
+
+      if (!isJsFile && !isTsFile) {
         throw new Error(
-          `RPC definitions must be '.js' files. filename: ${file}`,
+          `RPC definitions must be '.js or .ts' files. filename: ${file}`,
         );
       }
+
       const source = fs.readFileSync(file, 'utf8');
+
+      // the flow parser can also handle ts files
       const ast = j.withParser('flow')(source);
-      const moduleExports = ast
-        .find(j.AssignmentExpression, {
-          left: {
-            type: 'MemberExpression',
-            property: {type: 'Identifier', name: 'exports'},
-            object: {type: 'Identifier', name: 'module'},
-          },
-        })
-        .nodes();
+      const moduleExports = isJsFile
+        ? ast
+            .find(j.AssignmentExpression, {
+              left: {
+                type: 'MemberExpression',
+                property: {type: 'Identifier', name: 'exports'},
+                object: {type: 'Identifier', name: 'module'},
+              },
+            })
+            .nodes()
+        : ast.find(j.ExportDefaultDeclaration).nodes();
 
-      validateExports(moduleExports);
+      validateExports(moduleExports, isJsFile);
 
-      const propNames = moduleExports[0].right.properties.map(
-        prop => prop.key.name,
+      const exportDeclaration =
+        moduleExports[0].right || moduleExports[0].declaration;
+
+      const propNames = exportDeclaration.properties.map(
+        (prop: any) => prop.key.name,
       );
 
       const {fileName, className} = makeGeneratedFilename(file);
@@ -81,13 +91,19 @@ export const prepareFiles = async ({
   );
 };
 
-const makeGeneratedFilename = filePath => {
-  const basename = path.basename(filePath, '.js');
+const makeGeneratedFilename = (filePath: string) => {
+  const ext = path.extname(filePath);
+  const basename = path.basename(filePath, ext);
   const dirname = path.dirname(filePath);
-  const fileName = path.join(dirname, `${basename}Process.generated.js`);
+  const fileName = path.join(dirname, `${basename}Process.generated${ext}`);
   const className = `${basename}Process`;
   return {fileName, className};
 };
+
+const getFileType = (file: string) => ({
+  isJsFile: /\.js$/.test(file),
+  isTsFile: /\.ts$/.test(file),
+});
 
 const codeGen = async ({
   propNames,
@@ -95,7 +111,16 @@ const codeGen = async ({
   generatedFile,
   RPCProcessPath,
   className,
+}: {
+  propNames: any,
+  file: any,
+  generatedFile: any,
+  RPCProcessPath: any,
+  className: any,
 }) => {
+  const {isJsFile} = getFileType(file);
+  const exportDeclaration = isJsFile ? 'module.exports =' : 'export default';
+
   const lines = [
     '/**',
     ' * ****************************************************',
@@ -103,28 +128,38 @@ const codeGen = async ({
     ' * ****************************************************',
     ' */',
     '',
-    `import typeof Methods from '${relativePath(generatedFile, file)}'`,
-    `import RPCProcess from '${
+    `${
+      isJsFile
+        ? `import typeof Methods from '${relativePath(generatedFile, file)}'`
+        : ''
+    }`,
+    isJsFile ? '' : '// @ts-ignore until module is typed',
+    `import {RPCProcess} from '${
       RPCProcessPath === DEFAULT_RPC_PROCESS_PATH
         ? RPCProcessPath
         : relativePath(generatedFile, RPCProcessPath)
     }';`,
     '',
+    isJsFile ? '' : 'type Methods = any',
+    '',
   ];
 
   lines.push('');
   lines.push(`class ${className} extends RPCProcess<Methods> {`);
+  if (!isJsFile) lines.push('jsonRPCCall: any');
   lines.push('  initializeRemote(): Methods {');
   lines.push('    return {');
   for (const propName of propNames) {
     lines.push(
-      `      '${propName}': (this.jsonRPCCall.bind(this, '${propName}'): any),`,
+      isJsFile
+        ? `      '${propName}': (this.jsonRPCCall.bind(this, '${propName}'): any),`
+        : `      '${propName}': this.jsonRPCCall.bind(this, '${propName}'),`,
     );
   }
   lines.push('    };');
   lines.push('  };');
   lines.push('}');
-  lines.push(`module.exports = ${className};`);
+  lines.push(`${exportDeclaration} ${className};`);
 
   const code = await prettify(generatedFile, lines.join('\n'));
   const docblock = new Docblock(code);
@@ -134,20 +169,24 @@ const codeGen = async ({
     .update(docblock.getCode())
     .digest('hex');
 
-  docblock.setDirective('flow');
+  if (isJsFile) docblock.setDirective('flow');
   docblock.setDirective('generated', signed);
 
   return docblock.printFileContent();
 };
 
-const validateExports = nodes => {
+const validateExports = (nodes: any[], isJsFile = true) => {
+  const exportAssignment = isJsFile ? 'module.exports =' : 'export default';
+
   if (!nodes.length) {
     throw new Error(
-      `RPC definition file should have a "module.exports = " assignment`,
+      `RPC definition file should have ${
+        isJsFile ? 'a' : 'an'
+      } "${exportAssignment}" assignment`,
     );
   }
 
-  const exported = nodes[0].right;
+  const exported = nodes[0].right || nodes[0].declaration;
 
   if (exported.type !== 'ObjectExpression') {
     throw new Error(`RPC definition file must export an object`);
@@ -155,7 +194,7 @@ const validateExports = nodes => {
 
   const properties = exported.properties;
 
-  const errorMessages = properties.reduce((errors, property) => {
+  const errorMessages = properties.reduce((errors: any, property: any) => {
     if (!property.method) {
       errors.push(`
       RPC definition must export an object where properties can only be methods.
@@ -163,7 +202,7 @@ const validateExports = nodes => {
       property: ${JSON.stringify(property.key)}
 
       e.g.:
-        module.exports = {
+        ${exportAssignment} {
           test(a: number): Promise<number> {
               return Promise.resolve(1)
           }
@@ -180,6 +219,7 @@ const validateExports = nodes => {
     }
 
     if (
+      property.value.returnType &&
       !(
         property.value.returnType.typeAnnotation.id.type === 'Identifier' &&
         property.value.returnType.typeAnnotation.id.name === 'Promise'
@@ -199,7 +239,7 @@ const validateExports = nodes => {
   }
 };
 
-const relativePath = (from, to) => {
+const relativePath = (from: any, to: any) => {
   let rel = path.relative(path.dirname(from), to);
   if (!rel.match(/^\./)) {
     rel = './' + rel;
@@ -208,7 +248,7 @@ const relativePath = (from, to) => {
   return rel;
 };
 
-const prettify = async (generatedFile, code) => {
+const prettify = async (generatedFile: any, code: any) => {
   const config: any = await prettier.resolveConfig(generatedFile);
   return prettier.format(code, config);
 };

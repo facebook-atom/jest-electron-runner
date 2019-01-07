@@ -11,7 +11,7 @@
  * script to build (transpile) files.
  * By default it transpiles all files for all packages and writes them
  * into `build/` directory.
- * Non-js or files matching IGNORE_PATTERN will be copied without transpiling.
+ * Non-ts or files matching IGNORE_PATTERN will be copied without transpiling.
  */
 
 'use strict';
@@ -21,7 +21,7 @@ const path = require('path');
 const glob = require('glob');
 const mkdirp = require('mkdirp');
 
-const babel = require('babel-core');
+const babel = require('@babel/core');
 const chalk = require('chalk');
 const micromatch = require('micromatch');
 const prettier = require('prettier');
@@ -32,13 +32,14 @@ const PACKAGES_DIR = require('./getPackages').PACKAGES_DIR;
 const OK = chalk.reset.inverse.bold.green(' DONE ');
 const SRC_DIR = 'src';
 const BUILD_DIR = 'build';
-const JS_FILES_PATTERN = '**/*.js';
-const IGNORE_PATTERN = '**/__{tests,mocks}__/**';
-const INLINE_REQUIRE_BLACKLIST = /.*/;
+const SRC_FILES_PATTERN = '**/!(*.d).{js,ts}';
+const IGNORE_PATTERN = '**/{__{tests,mocks}}';
 
-const transformOptions = JSON.parse(
-  fs.readFileSync(path.resolve(__dirname, '..', '.babelrc'), 'utf8'),
-);
+// not being used since transform-inline-imports-commonjs does not work on line #124
+// const INLINE_REQUIRE_BLACKLIST = /.*/;
+
+const transformOptions = require('../babel.config');
+
 transformOptions.babelrc = false;
 // $FlowFixMe
 const prettierConfig = prettier.resolveConfig.sync(__filename);
@@ -72,16 +73,17 @@ function getBuildPath(file, buildFolder) {
   const pkgName = getPackageName(file);
   const pkgSrcPath = path.resolve(PACKAGES_DIR, pkgName, SRC_DIR);
   const pkgBuildPath = path.resolve(PACKAGES_DIR, pkgName, buildFolder);
-  const relativeToSrcPath = path.relative(pkgSrcPath, file);
+  const relativeToSrcPath = path
+    .relative(pkgSrcPath, file)
+    .replace(/\.ts/, '.js');
   return path.resolve(pkgBuildPath, relativeToSrcPath);
 }
 
 function buildNodePackage(p) {
   const srcDir = path.resolve(p, SRC_DIR);
   const pattern = path.resolve(srcDir, '**/*');
-  const files = glob.sync(pattern, {
-    nodir: true,
-  });
+
+  const files = glob.sync(pattern, {nodir: true});
 
   process.stdout.write(adjustToTerminalWidth(`${path.basename(p)}\n`));
 
@@ -92,7 +94,7 @@ function buildNodePackage(p) {
 function buildFile(file, silent) {
   const destPath = getBuildPath(file, BUILD_DIR);
 
-  mkdirp.sync(path.dirname(destPath));
+  const makeDir = () => mkdirp.sync(path.dirname(destPath));
   if (micromatch.isMatch(file, IGNORE_PATTERN)) {
     silent ||
       process.stdout.write(
@@ -100,7 +102,8 @@ function buildFile(file, silent) {
           path.relative(PACKAGES_DIR, file) +
           ' (ignore)\n',
       );
-  } else if (!micromatch.isMatch(file, JS_FILES_PATTERN)) {
+  } else if (!micromatch.isMatch(file, SRC_FILES_PATTERN)) {
+    makeDir();
     fs.createReadStream(file).pipe(fs.createWriteStream(destPath));
     silent ||
       process.stdout.write(
@@ -112,25 +115,18 @@ function buildFile(file, silent) {
           '\n',
       );
   } else {
+    makeDir();
     const options = Object.assign({}, transformOptions);
     options.plugins = options.plugins.slice();
 
-    if (!INLINE_REQUIRE_BLACKLIST.test(file)) {
-      // Remove normal plugin.
-      options.plugins = options.plugins.filter(
-        plugin =>
-          !(
-            Array.isArray(plugin) &&
-            plugin[0] === 'transform-es2015-modules-commonjs'
-          ),
-      );
-      options.plugins.push([
-        'transform-inline-imports-commonjs',
-        {
-          allowTopLevelThis: true,
-        },
-      ]);
-    }
+    /**
+     * // todo: remove comment
+     * Removed this code block below since `transform-inline-imports-commonjs` does
+     * not work with babel 7.
+     * https://github.com/zertosh/babel-plugin-transform-inline-imports-commonjs/issues/12#issue-392307642
+     *
+     * `if (!INLINE_REQUIRE_BLACKLIST.test(file)) {}`
+     * */
 
     const transformed = babel.transformFileSync(file, options).code;
     // $FlowFixMe
@@ -150,7 +146,12 @@ function buildFile(file, silent) {
 const files = process.argv.slice(2);
 
 if (files.length) {
-  files.forEach(buildFile);
+  process.stdout.write(chalk.inverse(' Transpiled files \n'));
+
+  // the 2nd parameter must be set to false explicitly because
+  // it would default to true for subsequent files when in watch mode
+  files.forEach(f => buildFile(f, false));
+  process.stdout.write('\n');
 } else {
   const packages = getPackages();
   process.stdout.write(chalk.inverse(' Building packages \n'));
