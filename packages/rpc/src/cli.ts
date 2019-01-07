@@ -4,10 +4,9 @@
  * This source code is licensed under the MIT license found in the
  * LICENSE file in the root directory of this source tree.
  *
- * @flow
  */
-
 import yargs from 'yargs';
+
 import {generate} from './generate';
 
 yargs
@@ -15,7 +14,7 @@ yargs
   .options('RPCProcessPath', {type: 'string'});
 
 const globs = yargs.argv._;
-const {RPCProcessPath} = yargs.argv;
+const {RPCProcessPath} = <{RPCProcessPath?: string}>yargs.argv;
 
 if (!globs.length) {
   // eslint-disable-next-line no-console

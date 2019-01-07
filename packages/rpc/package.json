@@ -1,19 +1,25 @@
 {
-    "name": "@jest-runner/rpc",
-    "version": "0.1.0",
-    "description": "RPC that powers Jest runners",
-    "author": "Aaron Abramov",
-    "license": "MIT",
-    "homepage": "https://github.com/facebook-atom/jest-electron-runner",
-    "repository": "https://github.com/facebook-atom/jest-electron-runner",
-    "dependencies": {
-        "@jest-runner/core": "^0.1.0",
-        "glob": "^7.1.3",
-        "jscodeshift": "^0.5.1",
-        "prettier": "^1.14.2",
-        "yargs": "^12.0.1"
-    },
-    "bin": {
-        "jest-runner-rpc-generate": "./bin/cli.js"
-    }
+  "name": "@jest-runner/rpc",
+  "version": "0.1.0",
+  "description": "RPC that powers Jest runners",
+  "author": "Aaron Abramov",
+  "license": "MIT",
+  "homepage": "https://github.com/facebook-atom/jest-electron-runner",
+  "repository": "https://github.com/facebook-atom/jest-electron-runner",
+  "bin": {
+    "jest-runner-rpc-generate": "./bin/cli.js"
+  },
+  "dependencies": {
+    "@jest-runner/core": "^0.1.0",
+    "glob": "^7.1.3",
+    "jscodeshift": "^0.6.2",
+    "prettier": "^1.14.2",
+    "yargs": "^12.0.1"
+  },
+  "devDependencies": {
+    "@types/glob": "^7.1.1",
+    "@types/prettier": "^1.15.2",
+    "@types/uuid": "^3.4.4",
+    "@types/yargs": "^12.0.4"
+  }
 }

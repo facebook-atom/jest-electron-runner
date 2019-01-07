@@ -4,48 +4,50 @@
  * This source code is licensed under the MIT license found in the
  * LICENSE file in the root directory of this source tree.
  *
- * @flow
  */
-
 /* global child_process$ChildProcess */
-
-import type {ServerID} from './utils';
-import {spawn} from 'child_process';
-import {makeUniqServerId} from './utils';
-import path from 'path';
-import {INITIALIZE_MESSAGE, JSONRPC_EVENT_NAME} from './constants';
+import {ChildProcess, spawn} from 'child_process';
 import {IPC} from 'node-ipc';
-import {serializeRequest, parseResponse} from './jsonrpc';
+import path from 'path';
 
-type SpawnFn = ({serverID: ServerID}) => child_process$ChildProcess;
-type SpawnNode = {|
-  useBabel?: boolean,
-  initFile: string,
-|};
+import {INITIALIZE_MESSAGE, JSONRPC_EVENT_NAME} from './constants';
+import {parseResponse, serializeRequest} from './jsonrpc';
+import {makeUniqServerId, ServerID} from './utils';
+
+type SpawnFn = (opts: {serverID: ServerID}) => ChildProcess;
+
+type SpawnNode = {
+  useBabel?: boolean;
+  initFile: string;
+};
 
 type ConstructorOptions =
-  | {|
-      spawn: SpawnFn,
-    |}
-  | {|spawnNode: SpawnNode|};
+  | {
+      spawn: SpawnFn;
+    }
+  | {spawnNode: SpawnNode};
+
+function isSpawnNode(type: ConstructorOptions): type is {spawnNode: SpawnNode} {
+  return (<{spawnNode: SpawnNode}>type).spawnNode !== undefined;
+}
 
 export default class RPCProcess<Methods> {
-  _ipc: IPC;
-  server: Object;
+  _ipc: any;
+  server!: {[key: string]: any};
   serverID: ServerID;
   isAlive: boolean;
   _spawn: SpawnFn;
   remote: Methods;
   _socket: any;
-  _pendingRequests: {[string]: {resolve: Function, reject: Function}};
-  _subprocess: child_process$ChildProcess;
+  _pendingRequests: {[T: string]: {resolve: Function; reject: Function}};
+  _subprocess!: ChildProcess;
 
   constructor(options: ConstructorOptions) {
     this.serverID = makeUniqServerId();
     this.isAlive = false;
     this._ipc = new IPC();
 
-    this._spawn = options.spawnNode
+    this._spawn = isSpawnNode(options)
       ? makeSpawnNodeFn(this.serverID, options.spawnNode)
       : options.spawn;
     this.remote = this.initializeRemote();
@@ -64,13 +66,16 @@ export default class RPCProcess<Methods> {
     this._subprocess = this._spawn({serverID: this.serverID});
     const socket = await new Promise(async resolve => {
       this._ipc.serve(() => {
-        this._ipc.server.on(INITIALIZE_MESSAGE, (message, socket) => {
-          this.server = this._ipc.server;
-          this.isAlive = true;
-          resolve(socket);
-        });
+        this._ipc.server.on(
+          INITIALIZE_MESSAGE,
+          (_message: any, socket: any) => {
+            this.server = this._ipc.server;
+            this.isAlive = true;
+            resolve(socket);
+          },
+        );
 
-        this._ipc.server.on(JSONRPC_EVENT_NAME, json => {
+        this._ipc.server.on(JSONRPC_EVENT_NAME, (json: string) => {
           this.handleJsonRPCResponse(json);
         });
       });
@@ -99,11 +104,11 @@ export default class RPCProcess<Methods> {
       const {id, json} = serializeRequest(method, [...args]);
       this.server.emit(this._socket, JSONRPC_EVENT_NAME, json);
       this._pendingRequests[id] = {
-        resolve: data => {
+        resolve: (data: any) => {
           delete this._pendingRequests[id];
           resolve(data);
         },
-        reject: error => {
+        reject: (error: any) => {
           delete this._pendingRequests[id];
           reject(new Error(`${error.code}:${error.message}\n${error.data}`));
         },
@@ -139,7 +144,10 @@ export default class RPCProcess<Methods> {
 const getBabelNodeBin = () =>
   path.resolve(__dirname, '../../../node_modules/.bin/babel-node');
 
-const makeSpawnNodeFn = (serverID, {initFile, useBabel}): SpawnFn => {
+const makeSpawnNodeFn = (
+  serverID: string,
+  {initFile, useBabel}: SpawnNode,
+): SpawnFn => {
   return () => {
     const bin = useBabel ? getBabelNodeBin() : 'node';
 

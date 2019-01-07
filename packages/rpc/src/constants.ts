@@ -4,10 +4,7 @@
  * This source code is licensed under the MIT license found in the
  * LICENSE file in the root directory of this source tree.
  *
- * @flow
  */
 
-/*:: import typeof RPCConnectionType from './src/RPCConnection'; */
-const RPCConnection /*: RPCConnectionType */ = require('./build/RPCConnection');
-
-module.exports = RPCConnection;
+export const INITIALIZE_MESSAGE = '__________initialize____________';
+export const JSONRPC_EVENT_NAME = '__JSON_RPC__';

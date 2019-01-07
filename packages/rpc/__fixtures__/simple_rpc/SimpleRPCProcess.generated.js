@@ -7,7 +7,7 @@
  */
 
 import typeof Methods from './SimpleRPC.js';
-import RPCProcess from '../../RPCProcess.js';
+import {RPCProcess} from '../../index.js';
 
 class SimpleRPCProcess extends RPCProcess<Methods> {
   initializeRemote(): Methods {

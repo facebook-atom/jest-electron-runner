@@ -89,11 +89,10 @@ class Docblock {
         case 'directive': {
           const value = node.value
             .split('\n')
-            .map(
-              (line, index) =>
-                // If it's a multiline directive we force add indentation for
-                // other lines if there isn't any already.
-                index > 0 && !line.match(/^\s+/) ? `  ${line}` : line,
+            .map((line, index) =>
+              // If it's a multiline directive we force add indentation for
+              // other lines if there isn't any already.
+              index > 0 && !line.match(/^\s+/) ? `  ${line}` : line,
             )
             .join('\n * ');
           return ` * @${node.name}${value ? ' ' + value : ''}`;

@@ -14,12 +14,18 @@
   },
   "homepage": "https://github.com/facebook-atom/jest-electron-runner#readme",
   "devDependencies": {
-    "babel-cli": "6.26.0",
+    "@babel/cli": "^7.2.3",
+    "@babel/core": "^7.2.2",
+    "@babel/node": "^7.2.2",
+    "@babel/plugin-proposal-class-properties": "^7.2.3",
+    "@babel/plugin-proposal-object-rest-spread": "^7.2.0",
+    "@babel/plugin-transform-modules-commonjs": "^7.2.0",
+    "@babel/preset-env": "^7.2.3",
+    "@babel/preset-flow": "^7.0.0",
+    "@babel/preset-typescript": "^7.1.0",
+    "babel-core": "^7.0.0-bridge.0",
     "babel-eslint": "^9.0.0",
-    "babel-plugin-transform-class-properties": "^6.24.1",
-    "babel-plugin-transform-es2015-modules-commonjs": "6.26.0",
-    "babel-plugin-transform-object-rest-spread": "^6.26.0",
-    "babel-preset-flow": "6.23.0",
+    "babel-jest": "^23.6.0",
     "eslint": "^5.4.0",
     "eslint-plugin-jest": "^21.22.0",
     "flow-bin": "^0.79.1",
@@ -29,20 +35,27 @@
     "jest-circus": "^23.6.0",
     "lerna": "3.1.4",
     "prettier": "^1.14.2",
-    "string-length": "^2.0.0"
+    "string-length": "^2.0.0",
+    "typescript": "^3.2.2",
+    "yargs": "^12.0.5"
   },
   "workspaces": [
     "packages/*"
   ],
   "scripts": {
     "flow": "flow check",
-    "build": "flow-node ./scripts/build",
-    "build-watch": "flow-node ./scripts/build && flow-node ./scripts/build-watch",
+    "build": "flow-node ./scripts/build && yarn build-ts",
+    "build-ts": "tsc --build --verbose",
+    "build-watch": "flow-node ./scripts/build && flow-node ./scripts/build-watch & tsc --build --watch",
+    "typecheck": "yarn build-ts",
     "clean": "rm -rf ./packages/*/build",
     "lint": "eslint .",
     "test": "jest -w 3",
     "test-all": "yarn flow && yarn test && yarn lint",
-    "gen-rpc": "node packages/rpc/bin/cli.js packages/*/src/rpc/{JestWorkerRPC,NuclideE2ERPC}.js"
+    "gen-rpc": "node packages/rpc/bin/cli.js packages/*/src/rpc/{JestWorkerRPC,NuclideE2ERPC,JestWorkerRPCTest}.{js,ts}"
   },
-  "dependencies": {}
+  "dependencies": {},
+  "resolutions": {
+    "babel-core": "^7.0.0-bridge.0"
+  }
 }

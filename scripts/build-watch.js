@@ -35,6 +35,7 @@ const exists = filename => {
 };
 const rebuild = filename => filesToBuild.set(filename, true);
 
+const FILE_CHANGE_DATE = new Map();
 getPackages().forEach(p => {
   const srcDir = path.resolve(p, 'src');
   try {
@@ -43,6 +44,16 @@ getPackages().forEach(p => {
       const filePath = path.resolve(srcDir, filename);
 
       if ((event === 'change' || event === 'rename') && exists(filePath)) {
+        const fileChangeDate = Date.now();
+        const lastChangeDate = FILE_CHANGE_DATE.get(filePath) || 0;
+
+        // when running in watch mode, fs.watch may report a file change
+        // multiple times. this is an ugly hack to minimize that, without using
+        // a 3rd party module like chokidar. using 5 secs since rebuilding the types
+        // can take a few seconds.
+        if (fileChangeDate - lastChangeDate < 5000) return;
+        FILE_CHANGE_DATE.set(filePath, fileChangeDate);
+
         console.log(chalk.green('->'), `${event}: ${filename}`);
         rebuild(filePath);
       } else {

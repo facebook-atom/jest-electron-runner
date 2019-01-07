@@ -3,24 +3,19 @@
  *
  * This source code is licensed under the MIT license found in the
  * LICENSE file in the root directory of this source tree.
- *
- * @flow
  */
-
-import {validateIPCID} from './utils';
 import {IPC} from 'node-ipc';
-import {INITIALIZE_MESSAGE, JSONRPC_EVENT_NAME} from './constants';
-import {
-  parseRequest,
-  serializeResultResponse,
-  serializeErrorResponse,
-} from './jsonrpc';
 
-export default class RPCConnection<
-  Methods: {[string]: (...Args: any) => Promise<any>},
-> {
+import {INITIALIZE_MESSAGE, JSONRPC_EVENT_NAME} from './constants';
+import {parseRequest, serializeErrorResponse, serializeResultResponse} from './jsonrpc';
+import {validateIPCID} from './utils';
+
+type Methods = {[x: string]: (...Args: any) => Promise<any>};
+
+export default class RPCConnection {
   methods: Methods;
-  _ipc: IPC;
+  // casting to any since the node-ipc typings do not export NodeIPC.IPC
+  _ipc: any;
 
   constructor(methods: Methods) {
     this.methods = methods;
@@ -39,7 +34,7 @@ export default class RPCConnection<
           this._ipc.of[serverID].emit(INITIALIZE_MESSAGE);
         });
 
-        this._ipc.of[serverID].on(JSONRPC_EVENT_NAME, data => {
+        this._ipc.of[serverID].on(JSONRPC_EVENT_NAME, (data: any) => {
           const {method, params, id} = parseRequest(data);
           this.methods[method]
             .apply(null, params)
