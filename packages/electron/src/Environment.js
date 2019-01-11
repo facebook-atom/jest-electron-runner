@@ -8,6 +8,8 @@
  * @format
  */
 
+import type {ProjectConfig} from '@jest-runner/core/types';
+
 import mock from 'jest-mock';
 import {installCommonGlobals} from 'jest-util';
 
@@ -16,7 +18,7 @@ export default class ElectronEnvironment {
   moduleMocker: Object;
   fakeTimers: Object;
 
-  constructor(config: any) {
+  constructor(config: ProjectConfig) {
     this.global = global;
     this.moduleMocker = new mock.ModuleMocker(global);
     this.fakeTimers = {

@@ -20,6 +20,7 @@ export type ProjectConfig = {
   rootDir: string,
   setupFiles: Array<string>,
   setupTestFrameworkScriptFile: ?string,
+  globals?: Object,
 };
 export type Resolver = {};
 export type RawModuleMap = {};
