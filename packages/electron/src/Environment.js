@@ -9,13 +9,14 @@
  */
 
 import mock from 'jest-mock';
+import {installCommonGlobals} from 'jest-util';
 
 export default class ElectronEnvironment {
   global: Object;
   moduleMocker: Object;
   fakeTimers: Object;
 
-  constructor() {
+  constructor(config: any) {
     this.global = global;
     this.moduleMocker = new mock.ModuleMocker(global);
     this.fakeTimers = {
@@ -23,6 +24,7 @@ export default class ElectronEnvironment {
         throw new Error('fakeTimers are not supproted in atom environment');
       },
     };
+    installCommonGlobals(global, config.globals);
   }
 
   async setup() {}
