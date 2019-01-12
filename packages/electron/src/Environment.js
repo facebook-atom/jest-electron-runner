@@ -35,7 +35,7 @@ export default class ElectronEnvironment {
 
   runScript(script: any): ?any {
     // Since evrey tests runs in a new window we don't need any extra isolation
-    // as we need in Jest node runner
+    // as we need in Jest node runner.
     return script.runInThisContext();
   }
 }
