@@ -22,7 +22,7 @@ const isMain = process.env.isMain === 'true';
 app.on('ready', async () => {
   // electron automatically quits if all windows are destroyed,
   // this mainWindow will keep electron running even if all other windows
-  // are gone. There's probably a better way to do it.
+  // are gone. There's probably a better way to do it
   // eslint-disable-next-line no-unused-vars
   const mainWindow = new BrowserWindow({show: false});
 

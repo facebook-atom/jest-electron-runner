@@ -23,7 +23,7 @@ const setupConsole = () => {
   const testConsole = new BufferedConsole(() => {});
   const originalWrite = BufferedConsole.write;
   BufferedConsole.write = (...args) => {
-    // make sure the stack trace still points to the original .log origin
+    // make sure the stack trace still points to the original .log origin.
     args[3] = 5;
     return originalWrite(...args);
   };

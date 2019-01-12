@@ -8,7 +8,7 @@
  */
 
 /**
- * Class to parse and edit docblocks in js (and other languages) files.
+ * Class to parse and edit docblocks in js (and other languages) files
  *
  * Example:
  *    code = `

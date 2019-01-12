@@ -8,7 +8,6 @@
  */
 
 export type ServerID = string;
-
 export const rand = () => Math.floor(Math.random() * 10000000);
 
 export const validateIPCID = (id: ?string): string => {
