@@ -9,9 +9,9 @@
 
 module.exports = {
   projects: [
-    './jest_configs/jest.config.renderer.js',
+    './jest_configs/jest.config.fiddle.js',
     './jest_configs/jest.config.main.js',
     './jest_configs/jest.config.node.js',
-    './jest_configs/jest.config.fiddle.js',
+    './jest_configs/jest.config.renderer.js',
   ],
 };
