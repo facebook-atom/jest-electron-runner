@@ -9,11 +9,11 @@
 
 import type {TestResult} from '@jest-runner/core/types';
 import type {IPCTestData} from '../../types';
-import setupExpect from 'jest-circus/build/legacy_code_todo_rewrite/jest_expect';
+import setupExpect from 'jest-circus/build/legacy-code-todo-rewrite/jestExpect';
 import {
   initialize,
   runAndTransformResultsToJestFormat,
-} from 'jest-circus/build/legacy_code_todo_rewrite/jest_adapter_init';
+} from 'jest-circus/build/legacy-code-todo-rewrite/jestAdapterInit';
 import electron from 'electron';
 
 import {buildFailureTestResult} from '@jest-runner/core/utils';

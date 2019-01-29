@@ -7,7 +7,7 @@
  * @flow
  */
 
-import type {RawModuleMap, ProjectConfig} from '@jest-runner/core/types';
+import type {ProjectConfig} from '@jest-runner/core/types';
 
 import Runtime from 'jest-runtime';
 import HasteMap from 'jest-haste-map';
@@ -43,15 +43,18 @@ const wrapResolver = resolver => {
 const resolvers = Object.create(null);
 export const getResolver = (
   config: ProjectConfig,
-  rawModuleMap: RawModuleMap,
+  serializableModuleMap: Object,
 ) => {
   // In watch mode, the raw module map with all haste modules is passed from
   // the test runner to the watch command. This is because jest-haste-map's
   // watch mode does not persist the haste map on disk after every file change.
   // To make this fast and consistent, we pass it from the TestRunner.
-  if (rawModuleMap) {
+  if (serializableModuleMap) {
+    const moduleMap = serializableModuleMap
+      ? HasteMap.ModuleMap.fromJSON(serializableModuleMap)
+      : null;
     return wrapResolver(
-      Runtime.createResolver(config, new HasteMap.ModuleMap(rawModuleMap)),
+      Runtime.createResolver(config, new HasteMap.ModuleMap(moduleMap)),
     );
   } else {
     const name = config.name;

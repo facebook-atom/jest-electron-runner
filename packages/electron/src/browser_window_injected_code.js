@@ -19,7 +19,7 @@ import type {IPCTestData} from '../types';
 
 import {buildFailureTestResult} from '@jest-runner/core/utils';
 import {ipcRenderer} from 'electron';
-import runTest from 'jest-runner/build/run_test';
+import runTest from 'jest-runner/build/runTest';
 import {getResolver} from './utils/resolver';
 
 // $FlowFixMe
@@ -33,7 +33,7 @@ ipcRenderer.on(
         testData.path,
         testData.globalConfig,
         testData.config,
-        getResolver(testData.config, testData.rawModuleMap),
+        getResolver(testData.config, testData.serialisableModuleMap),
       );
 
       ipcRenderer.send(workerID, result);

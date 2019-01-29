@@ -27,7 +27,7 @@ export type RawModuleMap = {};
 
 export type Context = {
   moduleMap: {
-    getRawModuleMap(): RawModuleMap,
+    toJSON(): Object,
   },
   config: ProjectConfig,
 };

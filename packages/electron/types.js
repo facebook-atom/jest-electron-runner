@@ -8,17 +8,13 @@
  * @format
  */
 
-import type {
-  RawModuleMap,
-  ProjectConfig,
-  GlobalConfig,
-} from '@jest-runner/core/types';
+import type {ProjectConfig, GlobalConfig} from '@jest-runner/core/types';
 
-export type IPCTestData = {
-  rawModuleMap: RawModuleMap,
+export type IPCTestData = {|
+  serialisableModuleMap: Object,
   config: ProjectConfig,
   globalConfig: GlobalConfig,
   path: string,
-};
+|};
 
 export type TestRunnerTarget = 'renderer' | 'main';

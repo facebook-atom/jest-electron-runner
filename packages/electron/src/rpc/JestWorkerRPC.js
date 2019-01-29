@@ -9,7 +9,7 @@
 
 import type {TestResult} from '@jest-runner/core/types';
 import type {IPCTestData} from '../../types';
-import runTest from 'jest-runner/build/run_test';
+import runTest from 'jest-runner/build/runTest';
 
 import {
   makeUniqWorkerId,
@@ -27,7 +27,7 @@ const _runInNode = async (testData: IPCTestData): Promise<TestResult> => {
       testData.path,
       testData.globalConfig,
       testData.config,
-      getResolver(testData.config, testData.rawModuleMap),
+      getResolver(testData.config, testData.serialisableModuleMap),
     );
   } catch (error) {
     // eslint-disable-next-line no-console

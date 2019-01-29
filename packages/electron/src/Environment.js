@@ -23,8 +23,9 @@ export default class ElectronEnvironment {
     this.moduleMocker = new mock.ModuleMocker(global);
     this.fakeTimers = {
       useFakeTimers() {
-        throw new Error('fakeTimers are not supproted in atom environment');
+        throw new Error('fakeTimers are not supproted in electron environment');
       },
+      clearAllTimers() {},
     };
     installCommonGlobals(global, config.globals);
   }
