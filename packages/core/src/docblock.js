@@ -166,8 +166,7 @@ class Docblock {
     const docblockMatch = code.match(DOCBLOCK_RE);
     const originalDocblock = docblockMatch ? docblockMatch[0] || '' : '';
     const restOfTheFile = docblockMatch
-      ? // $FlowFixMe match object is weird
-        code.slice(docblockMatch.index + docblockMatch[0].length, code.length)
+      ? code.slice(docblockMatch.index + docblockMatch[0].length, code.length)
       : code;
 
     // only text, without `*` or `/**` or `*/`

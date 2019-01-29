@@ -10,6 +10,6 @@
         "@jest-runner/core": "^0.2.2",
         "@jest-runner/rpc": "^0.2.2",
         "fs-extra": "^7.0.0",
-        "jest-circus": "^23.5.0"
+        "jest-circus": "^24.0.0"
     }
 }

@@ -138,21 +138,20 @@ export default class TestRunner {
       tests.map(
         throat(concurrency, async test => {
           onStart(test);
-          const rawModuleMap = test.context.moduleMap.getRawModuleMap();
           const config = test.context.config;
           const globalConfig = this._globalConfig;
+          // $FlowFixMe
           const rpc = await startWorker({rootDir, target});
           await rpc.remote
             .runTest({
-              rawModuleMap,
+              serializableModuleMap: test.context.moduleMap.toJSON(),
               config,
               globalConfig,
               path: test.path,
             })
             .then(testResult => {
               testResult.testExecError != null
-                ? // $FlowFixMe jest expects it to be rejected with an object
-                  onFailure(test, testResult.testExecError)
+                ? onFailure(test, testResult.testExecError)
                 : onResult(test, testResult);
             })
             .catch(error => onFailure(test, error));

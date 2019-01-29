@@ -21,7 +21,7 @@ const path = require('path');
 const glob = require('glob');
 const mkdirp = require('mkdirp');
 
-const babel = require('babel-core');
+const babel = require('@babel/core');
 const chalk = require('chalk');
 const micromatch = require('micromatch');
 const prettier = require('prettier');
@@ -36,9 +36,7 @@ const JS_FILES_PATTERN = '**/*.js';
 const IGNORE_PATTERN = '**/__{tests,mocks}__/**';
 const INLINE_REQUIRE_BLACKLIST = /.*/;
 
-const transformOptions = JSON.parse(
-  fs.readFileSync(path.resolve(__dirname, '..', '.babelrc'), 'utf8'),
-);
+const transformOptions = require('../babel.config.js');
 transformOptions.babelrc = false;
 // $FlowFixMe
 const prettierConfig = prettier.resolveConfig.sync(__filename);
