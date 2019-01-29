@@ -29,7 +29,7 @@
     "fs-extra": "^7.0.0",
     "jest": "^24.0.0",
     "jest-circus": "^24.0.0",
-    "lerna": "3.1.4",
+    "lerna": "^3.10.7",
     "prettier": "^1.14.2",
     "string-length": "^2.0.0"
   },
