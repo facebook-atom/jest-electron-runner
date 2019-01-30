@@ -13,7 +13,9 @@ window.ELECTRON_DISABLE_SECURITY_WARNINGS = true;
 
 // react devtools only checks for the presence of a production environment
 // in order to suggest downloading it, which means it logs a msg in a test environment
-window.__REACT_DEVTOOLS_GLOBAL_HOOK__ = {isDisabled: true};
+if (!window.__REACT_DEVTOOLS_GLOBAL_HOOK__) {
+  window.__REACT_DEVTOOLS_GLOBAL_HOOK__ = {isDisabled: true};
+}
 
 import type {IPCTestData} from '../types';
 
