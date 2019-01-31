@@ -1,14 +1,14 @@
 {
     "name": "@jest-runner/electron",
-    "version": "1.0.1",
+    "version": "1.0.2",
     "description": "Jest runner that spawns atom/electron workers instead of node",
     "author": "Aaron Abramov",
     "license": "MIT",
     "homepage": "https://github.com/facebook-atom/jest-electron-runner",
     "repository": "https://github.com/facebook-atom/jest-electron-runner",
     "dependencies": {
-        "@jest-runner/core": "^1.0.0",
-        "@jest-runner/rpc": "^1.0.0",
+        "@jest-runner/core": "^1.0.2",
+        "@jest-runner/rpc": "^1.0.2",
         "electron": "^2.0.8",
         "jest-haste-map": "^24.0.0",
         "jest-runner": "^24.0.0",
