@@ -7,6 +7,7 @@
     "homepage": "https://github.com/facebook-atom/jest-electron-runner",
     "repository": "https://github.com/facebook-atom/jest-electron-runner",
     "dependencies": {
-        "node-ipc": "^9.1.1"
+        "node-ipc": "^9.1.1",
+        "jest-message-util": "^24.0.0"
     }
 }
