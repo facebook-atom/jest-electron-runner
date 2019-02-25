@@ -26,6 +26,11 @@ app.on('ready', async () => {
   // eslint-disable-next-line no-unused-vars
   const mainWindow = new BrowserWindow({show: false});
 
+  // for testing purposes, it is probably a good idea to keep everything at
+  // the same scale so that renders do not vary from device to device.
+  app.commandLine.appendSwitch('high-dpi-support', 1);
+  app.commandLine.appendSwitch('force-device-scale-factor', 1);
+
   if (isMain) {
     // we spin up an electron process for each test on the main process
     // which pops up an icon for each on macOs. Hiding them is less intrusive
