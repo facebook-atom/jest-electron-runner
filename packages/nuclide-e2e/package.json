@@ -10,6 +10,12 @@
         "@jest-runner/core": "^1.0.2",
         "@jest-runner/rpc": "^1.1.0",
         "fs-extra": "^7.0.0",
-        "jest-circus": "^24.0.0"
+        "jest-circus": "^24.0.0",
+        "jest-util": "^24.0.0",
+        "throat": "^4.1.0",
+        "uuid": "^3.3.2"
+    },
+    "peerDependencies": {
+        "electron": "*"
     }
 }

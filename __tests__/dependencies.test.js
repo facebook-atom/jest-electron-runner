@@ -65,7 +65,7 @@ test('packages', () => {
 });
 
 for (const pkg of packages) {
-  test.skip(`dependencies of ${path.relative(
+  test(`dependencies of ${path.relative(
     rootDir,
     pkg,
   )} are defined in package.json`, () => {
