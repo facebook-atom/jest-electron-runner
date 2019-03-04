@@ -1,0 +1,10 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`packages 1`] = `
+Array [
+  "packages/core",
+  "packages/electron",
+  "packages/nuclide-e2e",
+  "packages/rpc",
+]
+`;
