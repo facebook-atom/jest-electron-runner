@@ -18,5 +18,8 @@
     },
     "peerDependencies": {
         "electron": "*"
+    },
+    "devDependencies": {
+        "electron": "^2.0.8"
     }
 }
