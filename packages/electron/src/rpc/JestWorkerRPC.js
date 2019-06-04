@@ -44,7 +44,10 @@ const _runInNode = async (testData: IPCTestData): Promise<TestResult> => {
 const _runInBrowserWindow = (testData: IPCTestData): Promise<TestResult> => {
   return new Promise(resolve => {
     const workerID = makeUniqWorkerId();
-    const win = new BrowserWindow({show: false});
+    const win = new BrowserWindow({
+      show: false,
+      webPreferences: { nodeIntegration: true }
+    });
 
     win.loadURL(`file://${require.resolve('../index.html')}`);
     win.webContents.on('did-finish-load', () => {
