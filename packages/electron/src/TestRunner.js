@@ -118,7 +118,12 @@ export default class TestRunner {
   ) {
     const isWatch = this._globalConfig.watch || this._globalConfig.watchAll;
     const {maxWorkers, rootDir} = this._globalConfig;
-    const concurrency = isWatch ? 1 : Math.min(tests.length, maxWorkers);
+    const concurrency = isWatch
+      ? // because watch is usually used in the background, we'll only use
+        // half of the regular workers so we don't block other develper
+        // environment UIs
+        Math.ceil(Math.min(tests.length, maxWorkers) / 2)
+      : Math.min(tests.length, maxWorkers);
     const target = this.getTarget();
 
     const cleanup = once(() => {
