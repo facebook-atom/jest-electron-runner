@@ -19,17 +19,17 @@ import JestWorkerRPC from './rpc/JestWorkerRPC';
 
 const isMain = process.env.isMain === 'true';
 
+// for testing purposes, it is probably a good idea to keep everything at
+// the same scale so that renders do not vary from device to device.
+app.commandLine.appendSwitch('high-dpi-support', 1);
+app.commandLine.appendSwitch('force-device-scale-factor', 1);
+
 app.on('ready', async () => {
   // electron automatically quits if all windows are destroyed,
   // this mainWindow will keep electron running even if all other windows
   // are gone. There's probably a better way to do it
   // eslint-disable-next-line no-unused-vars
-  const mainWindow = new BrowserWindow({show: false});
-
-  // for testing purposes, it is probably a good idea to keep everything at
-  // the same scale so that renders do not vary from device to device.
-  app.commandLine.appendSwitch('high-dpi-support', 1);
-  app.commandLine.appendSwitch('force-device-scale-factor', 1);
+  const mainWindow = new BrowserWindow({show: false})
 
   if (isMain) {
     // we spin up an electron process for each test on the main process
