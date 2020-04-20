@@ -45,7 +45,12 @@ const startWorker = async ({
       );
       const currentNodeBinPath = process.execPath;
       const electronBin = getElectronBin(rootDir);
-      return spawn(currentNodeBinPath, [electronBin, injectedCodePath], {
+      return spawn(currentNodeBinPath,
+        [
+          electronBin,
+          process.env.JEST_ELECTRON_RUNNER_DEBUG_PORT ? `--inspect=${process.env.JEST_ELECTRON_RUNNER_DEBUG_PORT}` : ''
+          injectedCodePath
+        ], {
         stdio: [
           'inherit',
           // redirect child process' stdout to parent process stderr, so it
@@ -59,7 +64,7 @@ const startWorker = async ({
           ...(isMain(target) ? {isMain: 'true'} : {}),
           JEST_SERVER_ID: serverID,
         },
-        detached: true,
+        detached: process.env.JEST_ELECTRON_DISABLE_PROCESS_DETACHMENT ? false : true,
       });
     },
   });
