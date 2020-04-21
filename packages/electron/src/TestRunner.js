@@ -45,7 +45,7 @@ const startWorker = async ({
       );
 
       const currentNodeBinPath = process.execPath;
-			const electronBin = (0, _get_electron_bin.getElectronBin)(rootDir);
+      const electronBin = getElectronBin(rootDir);
 			const spawnArgs = [electronBin]
 			if (process.env.JEST_ELECTRON_RUNNER_MAIN_THREAD_DEBUG_PORT) {
 				spawnArgs.push(`--inspect=${process.env.JEST_ELECTRON_RUNNER_MAIN_THREAD_DEBUG_PORT}`)
