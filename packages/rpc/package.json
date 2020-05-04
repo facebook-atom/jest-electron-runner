@@ -13,7 +13,7 @@
         "node-ipc": "^9.1.1",
         "prettier": "^1.14.2",
         "uuid": "^3.3.2",
-        "yargs": "^12.0.1"
+        "yargs": "^15.3.1"
     },
     "bin": {
         "jest-runner-rpc-generate": "./bin/cli.js"
