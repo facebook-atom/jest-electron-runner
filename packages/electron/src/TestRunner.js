@@ -43,9 +43,19 @@ const startWorker = async ({
       const injectedCodePath = require.resolve(
         './electron_process_injected_code.js',
       );
+
       const currentNodeBinPath = process.execPath;
       const electronBin = getElectronBin(rootDir);
-      return spawn(currentNodeBinPath, [electronBin, injectedCodePath], {
+			const spawnArgs = [electronBin]
+			if (process.env.JEST_ELECTRON_RUNNER_MAIN_THREAD_DEBUG_PORT) {
+				spawnArgs.push(`--inspect=${process.env.JEST_ELECTRON_RUNNER_MAIN_THREAD_DEBUG_PORT}`)
+			}
+			if (process.env.JEST_ELECTRON_RUNNER_RENDERER_THREAD_DEBUG_PORT) {
+				spawnArgs.push(`--remote-debugging-port=${process.env.JEST_ELECTRON_RUNNER_RENDERER_THREAD_DEBUG_PORT}`)
+			}
+			spawnArgs.push(injectedCodePath)
+
+      return spawn(currentNodeBinPath, spawnArgs, {
         stdio: [
           'inherit',
           // redirect child process' stdout to parent process stderr, so it
@@ -59,7 +69,7 @@ const startWorker = async ({
           ...(isMain(target) ? {isMain: 'true'} : {}),
           JEST_SERVER_ID: serverID,
         },
-        detached: true,
+        detached: process.env.JEST_ELECTRON_RUNNER_DISABLE_PROCESS_DETACHMENT ? false : true,
       });
     },
   });
