@@ -70,6 +70,7 @@ const _runInBrowserWindow = (testData: IPCTestData): Promise<TestResult> => {
 };
 
 const _runTest = (testData: IPCTestData): Promise<TestResult> => {
+  testData.config.extraGlobals || (testData.config.extraGlobals = []);
   return isMain ? _runInNode(testData) : _runInBrowserWindow(testData);
 };
 

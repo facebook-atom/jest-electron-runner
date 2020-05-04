@@ -16,11 +16,12 @@ export type GlobalConfig = {
   watchAll: boolean,
 };
 export type ProjectConfig = {
+  extraGlobals: Array<string>,
+  globals?: Object,
   name: string,
   rootDir: string,
   setupFiles: Array<string>,
   setupTestFrameworkScriptFile: ?string,
-  globals?: Object,
 };
 export type Resolver = {};
 export type RawModuleMap = {};
