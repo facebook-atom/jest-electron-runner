@@ -1,14 +1,14 @@
 {
     "name": "@jest-runner/nuclide-e2e",
-    "version": "2.0.0",
+    "version": "3.0.0",
     "description": "Jest runner that spawns atom/electron workers instead of node",
     "author": "Aaron Abramov",
     "license": "MIT",
     "homepage": "https://github.com/facebook-atom/jest-electron-runner",
     "repository": "https://github.com/facebook-atom/jest-electron-runner",
     "dependencies": {
-        "@jest-runner/core": "^2.0.0",
-        "@jest-runner/rpc": "^2.0.0",
+        "@jest-runner/core": "^3.0.0",
+        "@jest-runner/rpc": "^3.0.0",
         "fs-extra": "^7.0.0",
         "jest-circus": "^24.0.0",
         "jest-util": "^24.0.0",
