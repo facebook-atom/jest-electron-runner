@@ -47,6 +47,9 @@ const startWorker = async ({
       const currentNodeBinPath = process.execPath;
       const electronBin = getElectronBin(rootDir);
 			const spawnArgs = [electronBin]
+			if (process.env.JEST_ELECTRON_RUNNER_DISABLE_SANDBOX) {
+				spawnArgs.push('--no-sandbox');
+			}
 			if (process.env.JEST_ELECTRON_RUNNER_MAIN_THREAD_DEBUG_PORT) {
 				spawnArgs.push(`--inspect=${process.env.JEST_ELECTRON_RUNNER_MAIN_THREAD_DEBUG_PORT}`)
 			}
