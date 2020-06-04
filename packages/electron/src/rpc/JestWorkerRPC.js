@@ -104,7 +104,8 @@ module.exports = {
   runTest(testData: IPCTestData): Promise<TestResult> {
     return _runTest(testData);
   },
-  shutDown(): void {
-    return _destroyBrowserWindow();
+  shutDown(): Promise<any> {
+    _destroyBrowserWindow();
+    return Promise.resolve();
   },
 };
