@@ -1,6 +1,6 @@
 {
   "dependencies": {
-    "electron": "3"
+    "electron": "9"
   },
   "scripts": {
     "test": "../node_modules/.bin/jest"
