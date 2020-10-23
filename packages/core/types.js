@@ -21,7 +21,7 @@ export type ProjectConfig = {
   name: string,
   rootDir: string,
   setupFiles: Array<string>,
-  setupTestFrameworkScriptFile: ?string,
+  setupFilesAfterEnv: ?string,
 };
 export type Resolver = {};
 export type RawModuleMap = {};
