@@ -61,9 +61,9 @@ module.exports = {
         testPath: testData.path,
       });
 
-      const {setupTestFrameworkScriptFile} = testData.config;
-      if (setupTestFrameworkScriptFile) {
-        require(setupTestFrameworkScriptFile);
+      const {setupFilesAfterEnv} = testData.config;
+      if (setupFilesAfterEnv) {
+        require(setupFilesAfterEnv);
       }
       require(testData.path);
       const testResult = await runAndTransformResultsToJestFormat({

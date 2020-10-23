@@ -10,8 +10,8 @@
         "@jest-runner/core": "^3.0.0",
         "@jest-runner/rpc": "^3.0.0",
         "fs-extra": "^7.0.0",
-        "jest-circus": "^24.0.0",
-        "jest-util": "^24.0.0",
+        "jest-circus": "^26.6.0",
+        "jest-util": "^26.6.0",
         "throat": "^4.1.0",
         "uuid": "^3.3.2"
     },

@@ -20,6 +20,7 @@ import {BrowserWindow, ipcMain} from 'electron';
 import {getResolver} from '../utils/resolver';
 
 const isMain = process.env.isMain === 'true';
+let nextBrowserWindow;
 
 const _runInNode = async (testData: IPCTestData): Promise<TestResult> => {
   try {
@@ -41,18 +42,43 @@ const _runInNode = async (testData: IPCTestData): Promise<TestResult> => {
   }
 };
 
+const _createBrowserWindow = () => {
+  const win = new BrowserWindow({
+    show: false,
+    webPreferences: {
+      nodeIntegration: true,
+    }
+  });
+
+  win.loadURL(`file://${require.resolve('../index.html')}`);
+  return win;
+}
+
+const _getBrowserWindow = () => {
+  const win = nextBrowserWindow || _createBrowserWindow();
+  nextBrowserWindow = _createBrowserWindow();
+
+  return win;
+}
+
+const _destroyBrowserWindow = () => {
+  if (nextBrowserWindow && !nextBrowserWindow.isDestroyed()) {
+    nextBrowserWindow.destroy()
+  }
+}
+
 const _runInBrowserWindow = (testData: IPCTestData): Promise<TestResult> => {
   return new Promise(resolve => {
     const workerID = makeUniqWorkerId();
-    const win = new BrowserWindow({
-      show: false,
-      webPreferences: {nodeIntegration: true},
-    });
+    const win = _getBrowserWindow();
 
-    win.loadURL(`file://${require.resolve('../index.html')}`);
-    win.webContents.on('did-finish-load', () => {
+    if (win.webContents.isLoading()) {
+      win.webContents.on('did-finish-load', () => {
+        win.webContents.send('run-test', testData, workerID);
+      });
+    } else {
       win.webContents.send('run-test', testData, workerID);
-    });
+    }
 
     ipcMain.once(workerID, (event, testResult: TestResult) => {
       win.destroy();
@@ -79,6 +105,7 @@ module.exports = {
     return _runTest(testData);
   },
   shutDown(): Promise<any> {
+    _destroyBrowserWindow();
     return Promise.resolve();
   },
 };

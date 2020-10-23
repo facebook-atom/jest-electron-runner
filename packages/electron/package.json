@@ -9,11 +9,11 @@
     "dependencies": {
         "@jest-runner/core": "^3.0.0",
         "@jest-runner/rpc": "^3.0.0",
-        "jest-haste-map": "^25.0.0",
-        "jest-mock": "^25.0.0",
-        "jest-runner": "^25.0.0",
-        "jest-runtime": "^25.0.0",
-        "jest-util": "^25.0.0",
+        "jest-haste-map": "^26.6.0",
+        "jest-mock": "^26.6.0",
+        "jest-runner": "^26.6.0",
+        "jest-runtime": "^26.6.0",
+        "jest-util": "^26.6.0",
         "throat": "^4.1.0"
     },
     "peerDependencies": {
