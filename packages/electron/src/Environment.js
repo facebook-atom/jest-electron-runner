@@ -12,6 +12,7 @@ import type {ProjectConfig} from '@jest-runner/core/types';
 
 import mock from 'jest-mock';
 import {installCommonGlobals} from 'jest-util';
+import {JestFakeTimers as FakeTimers} from '@jest/fake-timers';
 
 export default class ElectronEnvironment {
   global: Object;
@@ -21,12 +22,19 @@ export default class ElectronEnvironment {
   constructor(config: ProjectConfig) {
     this.global = global;
     this.moduleMocker = new mock.ModuleMocker(global);
-    this.fakeTimers = {
-      useFakeTimers() {
-        throw new Error('fakeTimers are not supproted in electron environment');
-      },
-      clearAllTimers() {},
+
+    const timerConfig = {
+      idToRef: (id) => id,
+      refToId: (ref) => ref
     };
+
+    this.fakeTimers = new FakeTimers({
+      config,
+      global,
+      moduleMocker: this.moduleMocker,
+      timerConfig
+    })
+
     installCommonGlobals(global, config.globals);
   }
 
