@@ -24,6 +24,12 @@ const isMain = process.env.isMain === 'true';
 app.commandLine.appendSwitch('high-dpi-support', 1);
 app.commandLine.appendSwitch('force-device-scale-factor', 1);
 
+// disable hardware acceleration so tests are deterministic but let user
+// enable it again on demand with environment variable
+if (!process.env.JEST_ELECTRON_RUNNER_ENABLE_HARDWARE_ACCELERATION) {
+  app.disableHardwareAcceleration();
+}
+
 app.on('ready', async () => {
   // electron automatically quits if all windows are destroyed,
   // this mainWindow will keep electron running even if all other windows
