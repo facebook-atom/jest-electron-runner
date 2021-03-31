@@ -18,7 +18,7 @@ import RPCConnection from '@jest-runner/rpc/RPCConnection';
 import JestWorkerRPC from './rpc/JestWorkerRPC';
 
 const isMain = process.env.isMain === 'true';
-
+process.noAsar = process.env.noAsar
 // for testing purposes, it is probably a good idea to keep everything at
 // the same scale so that renders do not vary from device to device.
 app.commandLine.appendSwitch('high-dpi-support', 1);
