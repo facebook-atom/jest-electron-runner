@@ -55,6 +55,9 @@ const startWorker = async ({
 			}
 			spawnArgs.push(injectedCodePath)
 
+      if (global.gc) {
+        spawnArgs.push("--js-flags=--expose-gc");
+      }
       return spawn(currentNodeBinPath, spawnArgs, {
         stdio: [
           'inherit',
