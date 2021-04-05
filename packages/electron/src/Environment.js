@@ -25,6 +25,7 @@ export default class ElectronEnvironment {
       useFakeTimers() {
         throw new Error('fakeTimers are not supproted in electron environment');
       },
+      useRealTimers() {},
       clearAllTimers() {},
     };
     installCommonGlobals(global, config.globals);
